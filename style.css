@@ -1,0 +1,193 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /* Police plus moderne */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Dégradé subtil en arrière-plan */
+    background: linear-gradient(to bottom, #eef, #dde);
+    min-height: 100vh;
+    margin: 0;
+    padding-top: 20px;
+    color: #333;
+}
+
+h1 {
+    color: #2a4;
+    /* Vert un peu plus foncé */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.info-panel {
+    margin-bottom: 15px;
+    font-size: 1.1em;
+    background-color: #fff;
+    /* Fond blanc pour meilleure lisibilité */
+    padding: 10px 20px;
+    border-radius: 8px;
+    /* Coins plus arrondis */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+    /* Ombre plus prononcée */
+    border: 1px solid #ccc;
+}
+
+#game-container {
+    border: 3px solid #654321;
+    /* Bordure "bois" */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    border-radius: 5px;
+    /* Légers arrondis */
+    background-color: #1a7a1a;
+    /* Vert de base si dégradé non supporté */
+}
+
+#course {
+    width: 700px;
+    /* Légèrement plus large */
+    height: 450px;
+    /* Dégradé radial pour simuler un éclairage central */
+    background: radial-gradient(circle, #3ab03a, #2a8a2a);
+    position: relative;
+    overflow: hidden;
+    cursor: crosshair;
+    border-radius: 3px;
+    /* Pour correspondre au container */
+}
+
+#ball {
+    width: 20px;
+    height: 20px;
+    /* Dégradé radial pour effet 3D */
+    background: radial-gradient(circle at 6px 6px, #ffffff, #f0f0f0, #e0e0e0);
+    border-radius: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    /* Petite ombre portée */
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
+    z-index: 10;
+    /* S'assurer que la balle est au-dessus des obstacles */
+}
+
+#hole {
+    width: 32px;
+    /* Légèrement plus grand */
+    height: 32px;
+    /* Dégradé pour simuler la profondeur */
+    background: radial-gradient(circle, #111 30%, #000 70%);
+    border: none;
+    /* Enlever l'ancienne bordure */
+    border-radius: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.7);
+    /* Ombre intérieure */
+    z-index: 1;
+    /* Sous la balle */
+}
+
+/* Drapeau pour le trou */
+.flag {
+    position: absolute;
+    bottom: 50%;
+    /* Commence au centre du trou */
+    left: 50%;
+    width: 2px;
+    /* Mât */
+    height: 35px;
+    /* Hauteur du mât */
+    background-color: #eee;
+    transform-origin: bottom center;
+    transform: translateX(-50%);
+    /* Centrer le mât */
+}
+
+.flag::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 100%;
+    /* À droite du mât */
+    width: 18px;
+    /* Largeur drapeau */
+    height: 12px;
+    /* Hauteur drapeau */
+    background-color: #ff3b30;
+    /* Rouge vif */
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+
+/* Styles communs pour obstacles */
+.obstacle {
+    position: absolute;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+    z-index: 5;
+    /* Entre le trou et la balle */
+    border-radius: 3px;
+    /* Petit arrondi général */
+}
+
+/* Style Mur (ancien obstacle) */
+.obstacle-wall {
+    background: linear-gradient(to bottom, #a06f4a, #8b5a2b);
+    /* Dégradé bois/brique */
+    border: 1px solid #5a3d1a;
+}
+
+/* Style Eau */
+.obstacle-water {
+    background: linear-gradient(to bottom, #66bfff, #3399ff);
+    /* Dégradé bleu */
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3);
+    border: 1px solid #1a75ff;
+}
+
+/* Style Sable */
+.obstacle-sand {
+    background: #f4a460;
+    /* Sable */
+    background-image: url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23d2b48c' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E");
+    /* Texture subtile */
+    box-shadow: inset 1px 1px 5px rgba(0, 0, 0, 0.2);
+    border: 1px dashed #cdaa7c;
+    border-radius: 5px;
+}
+
+/* Style Obstacle Circulaire (si ajouté plus tard) */
+.obstacle-circle {
+    background: linear-gradient(to bottom, #ccc, #999);
+    /* Métal */
+    border: 1px solid #666;
+    border-radius: 50% !important;
+    /* Forcer le cercle */
+}
+
+
+#message-area {
+    margin-top: 15px;
+    font-size: 1.2em;
+    color: #fff;
+    /* Texte blanc */
+    min-height: 1.5em;
+    font-weight: bold;
+    background-color: #5c85d6;
+    /* Bleu plus soutenu */
+    padding: 10px 18px;
+    /* Plus d'espace */
+    border-radius: 20px;
+    /* Très arrondi */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    transition: background-color 0.3s ease;
+    /* Transition douce */
+}
+
+#message-area.success {
+    background-color: #28a745;
+    /* Vert succès */
+}
+
+#message-area.penalty {
+    background-color: #dc3545;
+    /* Rouge pénalité */
+}
