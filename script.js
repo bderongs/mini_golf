@@ -87,6 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // État du jeu
     let ballPos = { x: 0, y: 0, z: 0 };
     let ballVel = { x: 0, y: 0, z: 0 };
+    let currentHolePos = { x: 0, y: 0 };
     let currentHoleIndex = 0;
     let strokes = 0;
     let totalStrokes = 0;
@@ -98,11 +99,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentObstacles = [];
 
     // --- Fonctions Utilitaires --- (inchangées pour la plupart)
-    function getElementCenter(element) { /* ... idem ... */
-        const rect = element.getBoundingClientRect();
+    function getElementCenter(element) {
         return {
-            x: element.offsetLeft + rect.width / 2,
-            y: element.offsetTop + rect.height / 2
+            x: element.offsetLeft + element.offsetWidth / 2,
+            y: element.offsetTop + element.offsetHeight / 2
         };
     }
     function distance(p1, p2) { /* ... idem ... */
@@ -138,11 +138,11 @@ document.addEventListener('DOMContentLoaded', () => {
         ballVel = { x: 0, y: 0, z: 0 };
 
         ballPos = { ...data.start, z: 0 };
-        const holePos = { ...data.hole };
+        currentHolePos = { ...data.hole };
 
         updateElementPosition(ballElement, ballPos);
-        updateElementPosition(holeElement, holePos);
-        holeCoordsDisplay.textContent = `Hole: (${holePos.x.toFixed(2)}, ${holePos.y.toFixed(2)})`;
+        updateElementPosition(holeElement, currentHolePos);
+        holeCoordsDisplay.textContent = `Hole: (${currentHolePos.x.toFixed(2)}, ${currentHolePos.y.toFixed(2)})`;
 
         // Nettoyer les anciens obstacles
         currentObstacles.forEach(obs => obs.remove());
@@ -370,11 +370,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Mettre à jour la position visuelle
-        // Mettre à jour la position visuelle
         updateElementPosition(ballElement, ballPos);
 
-        const holePos = getElementCenter(holeElement);
-        const distToHole = distance(ballPos, holePos);
+        const distToHole = distance(ballPos, currentHolePos);
 
         if (distToHole < HOLE_RADIUS * 2) {
             console.log({
