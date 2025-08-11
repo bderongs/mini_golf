@@ -14,6 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const wedgeBtn = document.getElementById('wedge-btn');
     const ballShadowElement = document.getElementById('ball-shadow');
     const versionDisplayElement = document.getElementById('version-display');
+    const holeCoordsDisplay = document.getElementById('hole-coords-display');
+    const mouseCoordsDisplay = document.getElementById('mouse-coords-display');
 
     // Display version
     versionDisplayElement.textContent = `Version: ${new Date().toISOString()}`;
@@ -140,6 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         updateElementPosition(ballElement, ballPos);
         updateElementPosition(holeElement, holePos);
+        holeCoordsDisplay.textContent = `Hole: (${holePos.x.toFixed(2)}, ${holePos.y.toFixed(2)})`;
 
         // Nettoyer les anciens obstacles
         currentObstacles.forEach(obs => obs.remove());
@@ -450,6 +453,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         aimLineElement.setAttribute('x2', endX);
         aimLineElement.setAttribute('y2', endY);
+    });
+
+    courseElement.addEventListener('mousemove', (event) => {
+        const rect = courseElement.getBoundingClientRect();
+        const mouseX = event.clientX - rect.left;
+        const mouseY = event.clientY - rect.top;
+        mouseCoordsDisplay.textContent = `Mouse: (${mouseX.toFixed(2)}, ${mouseY.toFixed(2)})`;
     });
 
     document.addEventListener('mouseup', (event) => {
