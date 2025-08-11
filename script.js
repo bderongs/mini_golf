@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const MIN_VELOCITY = 0.08; // Réduit pour le sable
     const MAX_POWER = 18;      // Légèrement plus de puissance max
     const POWER_SENSITIVITY = 12; // Diviseur pour la sensibilité de puissance
-    const HOLE_RADIUS = 15;
+    const HOLE_RADIUS = 16;
     const BALL_RADIUS = 10;
     const WATER_PENALTY = 1; // Nombre de coups de pénalité pour l'eau
     const GRAVITY = 0.2; // Gravity for the wedge shot
@@ -369,7 +369,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const holePos = getElementCenter(holeElement);
         const distToHole = distance(ballPos, holePos);
 
-        if (ballPos.z === 0 && distToHole < HOLE_RADIUS && Math.hypot(ballVel.x, ballVel.y) < 2) { // The center of the ball is over the hole and the speed is low
+        if (ballPos.z === 0 && distToHole <= HOLE_RADIUS && Math.hypot(ballVel.x, ballVel.y) < 2) { // The center of the ball is over the hole and the speed is low
             isMoving = false;
             ballVel = { x: 0, y: 0, z: 0 };
             cancelAnimationFrame(animationFrameId);
@@ -393,7 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- Arrêter si vitesse faible ---
         if (Math.hypot(ballVel.x, ballVel.y) < MIN_VELOCITY) {
             isMoving = false;
-            ballVel = { x: 0, y: 0 };
+            ballVel = { x: 0, y: 0, z: 0 };
             cancelAnimationFrame(animationFrameId);
             showMessage(`Prêt pour le coup ${strokes + 1}.`);
             return;
