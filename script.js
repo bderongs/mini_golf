@@ -1,11 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Références DOM (ajout holeParElement)
+    // DOM References
     const ballElement = document.getElementById('ball');
     const holeElement = document.getElementById('hole');
     const courseElement = document.getElementById('course');
     const strokeCountElement = document.getElementById('stroke-count');
     const holeNumberElement = document.getElementById('hole-number');
-    const holeParElement = document.getElementById('hole-par'); // Ajout
+    const holeParElement = document.getElementById('hole-par');
     const messageAreaElement = document.getElementById('message-area');
     const totalParElement = document.getElementById('total-par');
     const totalStrokesElement = document.getElementById('total-strokes');
@@ -37,59 +37,50 @@ document.addEventListener('DOMContentLoaded', () => {
         putterBtn.classList.remove('active');
     });
 
-    // Constantes du jeu (ajout SAND_FRICTION)
-    const NORMAL_FRICTION = 0.985; // Légèrement moins de friction par défaut
-    const SAND_FRICTION = 0.88;  // Friction élevée dans le sable
-    const MIN_VELOCITY = 0.08; // Réduit pour le sable
-    const MAX_POWER = 18;      // Légèrement plus de puissance max
-    const POWER_SENSITIVITY = 12; // Diviseur pour la sensibilité de puissance
-    const HOLE_RADIUS = 16;
-    const BALL_RADIUS = 10;
-    const WATER_PENALTY = 1; // Nombre de coups de pénalité pour l'eau
-    const GRAVITY = 0.2; // Gravity for the wedge shot
+    // Game Constants
+    const NORMAL_FRICTION = 0.985;
+    const SAND_FRICTION = 0.88;
+    const MIN_VELOCITY = 0.08;
+    const MAX_POWER = 18;
+    const POWER_SENSITIVITY = 12;
+    const WATER_PENALTY = 1;
+    const GRAVITY = 0.2;
+    let HOLE_RADIUS = 16;
+    let BALL_RADIUS = 10;
 
-    // Données des trous (avec nouveaux types d'obstacles)
+    // Hole data using percentages for responsive design
     const holeData = [
-        // Trou 1: Simple
-        { start: { x: 60, y: 225 }, hole: { x: 640, y: 225 }, par: 3, obstacles: [] },
-        // Trou 2: Mur central
+        // Hole 1: Simple
+        { start: { x: 8.57, y: 50 }, hole: { x: 91.43, y: 50 }, par: 3, obstacles: [] },
+        // Hole 2: Center wall
         {
-            start: { x: 60, y: 60 }, hole: { x: 640, y: 390 }, par: 4, obstacles: [
-                { x: 330, y: 100, width: 40, height: 250, type: 'wall' }
+            start: { x: 8.57, y: 13.33 }, hole: { x: 91.43, y: 86.67 }, par: 4, obstacles: [
+                { x: 47.14, y: 22.22, width: 5.71, height: 55.56, type: 'wall' }
             ]
         },
-        // Trou 3: Obstacle d'eau
+        // Hole 3: Water hazard
         {
-            start: { x: 60, y: 225 }, hole: { x: 640, y: 225 }, par: 4, obstacles: [
-                { x: 250, y: 150, width: 200, height: 150, type: 'water' }
+            start: { x: 8.57, y: 50 }, hole: { x: 91.43, y: 50 }, par: 4, obstacles: [
+                { x: 35.71, y: 33.33, width: 28.57, height: 33.33, type: 'water' }
             ]
         },
-        // Trou 4: Bunker de sable avant le trou
+        // Hole 4: Sand bunker
         {
-            start: { x: 100, y: 390 }, hole: { x: 600, y: 60 }, par: 5, obstacles: [
-                { x: 450, y: 80, width: 200, height: 100, type: 'sand' },
-                { x: 150, y: 150, width: 200, height: 50, type: 'wall' }
+            start: { x: 14.29, y: 86.67 }, hole: { x: 85.71, y: 13.33 }, par: 5, obstacles: [
+                { x: 64.29, y: 17.78, width: 28.57, height: 22.22, type: 'sand' },
+                { x: 21.43, y: 33.33, width: 28.57, height: 11.11, type: 'wall' }
             ]
         },
-        // Trou 5: Combinaison Eau et Sable
+        // Hole 5: Combination
         {
-            start: { x: 60, y: 60 }, hole: { x: 640, y: 390 }, par: 5, obstacles: [
-                { x: 150, y: 0, width: 100, height: 250, type: 'water' },
-                { x: 450, y: 200, width: 100, height: 250, type: 'water' },
-                { x: 300, y: 180, width: 100, height: 90, type: 'sand' }
+            start: { x: 8.57, y: 13.33 }, hole: { x: 91.43, y: 86.67 }, par: 5, obstacles: [
+                { x: 21.43, y: 0, width: 14.29, height: 55.56, type: 'water' },
+                { x: 64.29, y: 44.44, width: 14.29, height: 55.56, type: 'water' },
+                { x: 42.86, y: 40, width: 14.29, height: 20, type: 'sand' }
             ]
         },
-        // Trou 6: Obstacle Circulaire (exemple - collision à ajouter si besoin)
-        // { start: { x: 50, y: 225 }, hole: { x: 650, y: 225 }, par: 4, obstacles: [
-        //     { x: 350, y: 225, radius: 30, type: 'circle' } // Centre x,y et rayon
-        // ]},
     ];
 
-    // État du jeu
-    let ballPos = { x: 0, y: 0, z: 0 };
-    let ballVel = { x: 0, y: 0, z: 0 };
-    let currentHolePos = { x: 0, y: 0 };
-    let currentHoleIndex = 0;
     let strokes = 0;
     let totalStrokes = 0;
     let totalPar = 0;
@@ -99,22 +90,22 @@ document.addEventListener('DOMContentLoaded', () => {
     let animationFrameId = null;
     let currentObstacles = [];
 
-    // --- Fonctions Utilitaires --- (inchangées pour la plupart)
+    // --- Utility Functions ---
     function getElementCenter(element) {
         return {
             x: element.offsetLeft + element.offsetWidth / 2,
             y: element.offsetTop + element.offsetHeight / 2
         };
     }
-    function distance(p1, p2) { /* ... idem ... */
+    function distance(p1, p2) {
         return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
     }
-    function updateElementPosition(element, pos) { /* ... idem ... */
+    function updateElementPosition(element, pos) {
         element.style.left = `${pos.x}px`;
         element.style.top = `${pos.y}px`;
     }
-    // Fonction message avec classes CSS pour style
-    function showMessage(msg, type = 'info') { // 'info', 'success', 'penalty'
+    // Message function with CSS classes for styling
+    function showMessage(msg, type = 'info') {
         messageAreaElement.textContent = msg;
         messageAreaElement.className = 'message-area'; // Reset classes
         if (type === 'success') {
@@ -124,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Logique du Jeu ---
+    // --- Game Logic ---
 
     function setupHole(holeIndex) {
         if (holeIndex >= holeData.length) {
@@ -132,73 +123,77 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        const courseRect = courseElement.getBoundingClientRect();
+        BALL_RADIUS = ballElement.offsetWidth / 2;
+        HOLE_RADIUS = holeElement.offsetWidth / 2;
+
         const data = holeData[holeIndex];
         currentHoleIndex = holeIndex;
         strokes = 0;
         isMoving = false;
         ballVel = { x: 0, y: 0, z: 0 };
 
-        ballPos = { ...data.start, z: 0 };
-        currentHolePos = { ...data.hole };
+        ballPos = {
+            x: data.start.x / 100 * courseRect.width,
+            y: data.start.y / 100 * courseRect.height,
+            z: 0
+        };
+        currentHolePos = {
+            x: data.hole.x / 100 * courseRect.width,
+            y: data.hole.y / 100 * courseRect.height
+        };
 
         updateElementPosition(ballElement, ballPos);
         updateElementPosition(holeElement, currentHolePos);
         holeCoordsDisplay.textContent = `Hole: (${currentHolePos.x.toFixed(2)}, ${currentHolePos.y.toFixed(2)})`;
 
-        // Nettoyer les anciens obstacles
+        // Clean up old obstacles
         currentObstacles.forEach(obs => obs.remove());
         currentObstacles = [];
 
-        // Ajouter les nouveaux obstacles
+        // Add new obstacles
         if (data.obstacles) {
             data.obstacles.forEach(obsData => {
                 const obsElement = document.createElement('div');
                 obsElement.classList.add('obstacle');
-                // Ajouter la classe spécifique au type
                 obsElement.classList.add(`obstacle-${obsData.type}`);
 
-                obsElement.style.left = `${obsData.x}px`;
-                obsElement.style.top = `${obsData.y}px`;
-                // Stocker toutes les données nécessaires pour la collision
-                obsElement.dataset.obsType = obsData.type;
-                obsElement.dataset.x = obsData.x;
-                obsElement.dataset.y = obsData.y;
+                const obsX = obsData.x / 100 * courseRect.width;
+                const obsY = obsData.y / 100 * courseRect.height;
+                const obsWidth = obsData.width / 100 * courseRect.width;
+                const obsHeight = obsData.height / 100 * courseRect.height;
 
-                if (obsData.type === 'circle') {
-                    // Pour les cercles, on stocke le rayon et on utilise width/height pour la taille visuelle
-                    const diameter = obsData.radius * 2;
-                    obsElement.style.width = `${diameter}px`;
-                    obsElement.style.height = `${diameter}px`;
-                    // On centre via left/top - rayon
-                    obsElement.style.left = `${obsData.x - obsData.radius}px`;
-                    obsElement.style.top = `${obsData.y - obsData.radius}px`;
-                    obsElement.dataset.radius = obsData.radius;
-                } else { // Rectangles (wall, water, sand)
-                    obsElement.style.width = `${obsData.width}px`;
-                    obsElement.style.height = `${obsData.height}px`;
-                    obsElement.dataset.width = obsData.width;
-                    obsElement.dataset.height = obsData.height;
-                }
+                obsElement.style.left = `${obsX}px`;
+                obsElement.style.top = `${obsY}px`;
+                obsElement.style.width = `${obsWidth}px`;
+                obsElement.style.height = `${obsHeight}px`;
+
+                // Store pixel values in dataset for collision detection
+                obsElement.dataset.obsType = obsData.type;
+                obsElement.dataset.x = obsX;
+                obsElement.dataset.y = obsY;
+                obsElement.dataset.width = obsWidth;
+                obsElement.dataset.height = obsHeight;
 
                 courseElement.appendChild(obsElement);
                 currentObstacles.push(obsElement);
             });
         }
 
-        // Mettre à jour l'UI (ajout Par du trou)
+        // Update UI
         holeNumberElement.textContent = holeIndex + 1;
-        holeParElement.textContent = data.par; // Afficher le Par du trou
+        holeParElement.textContent = data.par;
         strokeCountElement.textContent = strokes;
         totalPar = holeData.slice(0, holeIndex + 1).reduce((sum, h) => sum + h.par, 0);
         totalParElement.textContent = totalPar;
         totalStrokesElement.textContent = totalStrokes;
 
-        showMessage(`Trou ${holeIndex + 1} (Par ${data.par}). Visez !`);
+        showMessage(`Hole ${holeIndex + 1} (Par ${data.par}). Aim and shoot!`);
         aimLineElement.parentElement.style.visibility = 'hidden';
     }
 
     function gameOver() {
-        let message = `Partie terminée ! Score total: ${totalStrokes}`;
+        let message = `Game Over! Total score: ${totalStrokes}`;
         const diff = totalStrokes - totalPar;
         if (diff === 0) {
             message += " (Par)";
@@ -210,7 +205,6 @@ document.addEventListener('DOMContentLoaded', () => {
         showMessage(message, 'success');
     }
 
-    // Fonction pour vérifier si la balle est dans une zone de sable
     function isBallInSand(currentBallPos) {
         for (const obs of currentObstacles) {
             if (obs.dataset.obsType === 'sand') {
@@ -222,18 +216,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
                 if (currentBallPos.x > rect.left && currentBallPos.x < rect.right &&
                     currentBallPos.y > rect.top && currentBallPos.y < rect.bottom) {
-                    return true; // La balle est dans ce banc de sable
+                    return true;
                 }
             }
         }
-        return false; // La balle n'est dans aucun banc de sable
+        return false;
     }
-
 
     function update() {
         if (!isMoving) return;
 
-        // Apply 3D physics if the ball is in the air
+        // 3D Physics
         if (ballPos.z > 0 || ballVel.z > 0) {
             ballVel.z -= GRAVITY;
             ballPos.z += ballVel.z;
@@ -254,33 +247,29 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Déterminer la friction applicable
+        // Friction
         if (ballPos.z === 0) {
             const currentFriction = isBallInSand(ballPos) ? SAND_FRICTION : NORMAL_FRICTION;
-
-            // Appliquer la friction
             ballVel.x *= currentFriction;
             ballVel.y *= currentFriction;
         }
 
-        // Mettre à jour la position
+        // Update position
         const nextX = ballPos.x + ballVel.x;
         const nextY = ballPos.y + ballVel.y;
-        let potentialCollision = false; // Pour éviter multiples rebonds/actions par frame
+        let potentialCollision = false;
 
-        // --- Détection Collisions Obstacles ---
+        // Obstacle Collision
         for (const obs of currentObstacles) {
-            if (potentialCollision) break; // Si déjà géré (eau), passer au frame suivant
-
+            if (potentialCollision) break;
             const obsType = obs.dataset.obsType;
-            const obsRect = { // Utilisé pour tous les types rectangulaires
+            const obsRect = {
                 left: parseFloat(obs.dataset.x),
                 top: parseFloat(obs.dataset.y),
-                right: parseFloat(obs.dataset.x) + parseFloat(obs.dataset.width || 0), // width peut manquer pour circle
-                bottom: parseFloat(obs.dataset.y) + parseFloat(obs.dataset.height || 0)
+                right: parseFloat(obs.dataset.x) + parseFloat(obs.dataset.width),
+                bottom: parseFloat(obs.dataset.y) + parseFloat(obs.dataset.height)
             };
 
-            // AABB Check (pour tous les types rectangulaires)
             const collidesRect = (
                 nextX + BALL_RADIUS > obsRect.left &&
                 nextX - BALL_RADIUS < obsRect.right &&
@@ -290,36 +279,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (collidesRect) {
                 if (obsType === 'water' && ballPos.z === 0) {
-                    showMessage(`Splash ! Pénalité de ${WATER_PENALTY} coup(s).`, 'penalty');
-                    strokes += WATER_PENALTY; // Ajouter pénalité
+                    showMessage(`Splash! ${WATER_PENALTY} stroke penalty.`, 'penalty');
+                    strokes += WATER_PENALTY;
                     totalStrokes += WATER_PENALTY;
                     strokeCountElement.textContent = strokes;
                     totalStrokesElement.textContent = totalStrokes;
-                    // Remettre la balle au début du trou
-                    ballPos = { ...holeData[currentHoleIndex].start, z: 0 };
+                    // Reset ball position
+                    const courseRect = courseElement.getBoundingClientRect();
+                    ballPos = {
+                        x: holeData[currentHoleIndex].start.x / 100 * courseRect.width,
+                        y: holeData[currentHoleIndex].start.y / 100 * courseRect.height,
+                        z: 0
+                    };
                     ballVel = { x: 0, y: 0, z: 0 };
                     isMoving = false;
-                    potentialCollision = true; // Arrêter le traitement pour ce frame
-                    updateElementPosition(ballElement, ballPos); // Mettre à jour visuellement
-                    setTimeout(() => showMessage(`Prêt pour le coup ${strokes + 1}.`), 1000); // Message après délai
-                    break; // Sortir de la boucle des obstacles
-                }
-                else if (obsType === 'wall') {
-                    // Collision Mur (rebond simple comme avant)
+                    potentialCollision = true;
+                    updateElementPosition(ballElement, ballPos);
+                    setTimeout(() => showMessage(`Ready for stroke ${strokes + 1}.`), 1000);
+                    break;
+                } else if (obsType === 'wall') {
                     let collideX = false;
                     let collideY = false;
 
-                    // Vérifier si collision sur X
                     if (ballPos.y + BALL_RADIUS > obsRect.top && ballPos.y - BALL_RADIUS < obsRect.bottom) {
                         if ((ballPos.x + BALL_RADIUS <= obsRect.left && nextX + BALL_RADIUS > obsRect.left) ||
                             (ballPos.x - BALL_RADIUS >= obsRect.right && nextX - BALL_RADIUS < obsRect.right)) {
                             ballVel.x *= -1;
-                            // Ajustement pour éviter de rester coincé
                             ballPos.x = (ballVel.x > 0) ? obsRect.left - BALL_RADIUS - 0.1 : obsRect.right + BALL_RADIUS + 0.1;
                             collideX = true;
                         }
                     }
-                    // Vérifier si collision sur Y (si pas déjà X)
                     if (!collideX && ballPos.x + BALL_RADIUS > obsRect.left && ballPos.x - BALL_RADIUS < obsRect.right) {
                         if ((ballPos.y + BALL_RADIUS <= obsRect.top && nextY + BALL_RADIUS > obsRect.top) ||
                             (ballPos.y - BALL_RADIUS >= obsRect.bottom && nextY - BALL_RADIUS < obsRect.bottom)) {
@@ -328,176 +317,154 @@ document.addEventListener('DOMContentLoaded', () => {
                             collideY = true;
                         }
                     }
-                    potentialCollision = collideX || collideY; // Indiquer qu'une collision a eu lieu
-                    // Pas besoin de 'break' ici, car le sable peut être sous un mur
+                    if (collideX || collideY) {
+                        potentialCollision = true;
+                        if (ballPos.z > 0) {
+                            ballVel.z *= 0.8; // Lose some vertical velocity on wall hit
+                        }
+                    }
                 }
-                else if (obsType === 'sand') {
-                    // Pas de logique de collision spéciale pour le sable,
-                    // la friction est gérée par isBallInSand() au début de l'update.
-                    // On continue la boucle au cas où il y aurait un mur sous le sable.
-                }
-                // else if (obsType === 'circle') {
-                //    // TODO: Ajouter logique de collision cercle-cercle si besoin
-                // }
             }
-        } // Fin boucle obstacles
-
-        // Si collision Eau a eu lieu, on arrête ce frame
-        if (potentialCollision && ballVel.x === 0 && ballVel.y === 0) {
-            cancelAnimationFrame(animationFrameId);
-            return;
         }
 
-        // Mettre à jour la position si pas de reset dû à l'eau
+        if (potentialCollision && isMoving) { // only stop if a collision actually happened
+            // No need to cancel animation frame here if we want bounce to continue
+        }
+
         ballPos.x += ballVel.x;
         ballPos.y += ballVel.y;
 
-
-        // --- Détection collisions Bords Terrain ---
+        // Boundary Collision
         const courseRect = courseElement.getBoundingClientRect();
-        if (ballPos.x - BALL_RADIUS < 0) {
-            ballPos.x = BALL_RADIUS;
-            ballVel.x *= -0.8; // Rebond avec perte d'énergie
-        } else if (ballPos.x + BALL_RADIUS > courseRect.width) {
-            ballPos.x = courseRect.width - BALL_RADIUS;
+        if (ballPos.x - BALL_RADIUS < 0 || ballPos.x + BALL_RADIUS > courseRect.width) {
+            ballPos.x = Math.max(BALL_RADIUS, Math.min(courseRect.width - BALL_RADIUS, ballPos.x));
             ballVel.x *= -0.8;
         }
-        if (ballPos.y - BALL_RADIUS < 0) {
-            ballPos.y = BALL_RADIUS;
-            ballVel.y *= -0.8;
-        } else if (ballPos.y + BALL_RADIUS > courseRect.height) {
-            ballPos.y = courseRect.height - BALL_RADIUS;
+        if (ballPos.y - BALL_RADIUS < 0 || ballPos.y + BALL_RADIUS > courseRect.height) {
+            ballPos.y = Math.max(BALL_RADIUS, Math.min(courseRect.height - BALL_RADIUS, ballPos.y));
             ballVel.y *= -0.8;
         }
 
-        // Mettre à jour la position visuelle
+        // Update visual position
         updateElementPosition(ballElement, ballPos);
 
+        // Debug displays
         const distToHole = distance(ballPos, currentHolePos);
-
         liveHoleCoordsDisplay.textContent = `Live Hole: (${currentHolePos.x.toFixed(2)}, ${currentHolePos.y.toFixed(2)})`;
-
         if (distToHole < HOLE_RADIUS * 2) {
-            console.log({
-                distToHole,
-                ballVel: { ...ballVel },
-                ballPos: { ...ballPos },
-                HOLE_RADIUS,
-                speed: Math.hypot(ballVel.x, ballVel.y)
-            });
+            console.log({ distToHole, ballVel: { ...ballVel }, ballPos: { ...ballPos }, HOLE_RADIUS, speed: Math.hypot(ballVel.x, ballVel.y) });
         }
 
-        // --- Vérifier si dans le trou ---
-        if (ballPos.z === 0 && distToHole <= HOLE_RADIUS && Math.hypot(ballVel.x, ballVel.y) < 2) { // The center of the ball is over the hole and the speed is low
+        // Check for win
+        if (ballPos.z === 0 && distToHole <= HOLE_RADIUS && Math.hypot(ballVel.x, ballVel.y) < 2) {
             isMoving = false;
             ballVel = { x: 0, y: 0, z: 0 };
             cancelAnimationFrame(animationFrameId);
             const holePar = holeData[currentHoleIndex].par;
             let scoreMsg = "";
-            if (strokes === 1) scoreMsg = " (Trou en un !)";
-            else if (strokes < holePar) scoreMsg = ` (${strokes - holePar} sous le par, Birdie/Eagle!)`;
+            if (strokes === 1) scoreMsg = " (Hole in one!)";
+            else if (strokes < holePar) scoreMsg = ` (${holePar - strokes} under par, Birdie/Eagle!)`;
             else if (strokes === holePar) scoreMsg = " (Par)";
-            else scoreMsg = ` (+${strokes - holePar} au dessus du par)`;
+            else scoreMsg = ` (+${strokes - holePar} over par)`;
 
-            showMessage(`Trou ${currentHoleIndex + 1} réussi en ${strokes} coups !${scoreMsg}`, 'success');
+            showMessage(`Hole ${currentHoleIndex + 1} completed in ${strokes} strokes!${scoreMsg}`, 'success');
             totalStrokes += strokes;
             totalStrokesElement.textContent = totalStrokes;
 
             setTimeout(() => {
                 setupHole(currentHoleIndex + 1);
-            }, 2000); // Délai un peu plus long
+            }, 2000);
             return;
         }
 
-        // --- Arrêter si vitesse faible ---
+        // Check for stop
         if (ballPos.z === 0 && Math.hypot(ballVel.x, ballVel.y) < MIN_VELOCITY) {
             isMoving = false;
             ballVel = { x: 0, y: 0, z: 0 };
             cancelAnimationFrame(animationFrameId);
-            showMessage(`Prêt pour le coup ${strokes + 1}.`);
+            showMessage(`Ready for stroke ${strokes + 1}.`);
             return;
         }
 
-        // Continuer l'animation
         animationFrameId = requestAnimationFrame(update);
     }
 
-    // --- Gestion Souris --- (Ajustement sensibilité puissance)
-
-    courseElement.addEventListener('mousedown', (event) => {
+    // --- Event Handlers ---
+    const handleAimStart = (x, y) => {
         if (isMoving) return;
         isAiming = true;
         const rect = courseElement.getBoundingClientRect();
-        aimStartPos = { x: event.clientX - rect.left, y: event.clientY - rect.top };
-        // Ligne de visée
+        aimStartPos = { x: x - rect.left, y: y - rect.top };
         aimLineElement.setAttribute('x1', ballPos.x);
         aimLineElement.setAttribute('y1', ballPos.y);
         aimLineElement.setAttribute('x2', ballPos.x);
         aimLineElement.setAttribute('y2', ballPos.y);
         aimLineElement.parentElement.style.visibility = 'visible';
-        event.preventDefault();
-    });
+    };
 
-    document.addEventListener('mousemove', (event) => {
+    const handleAimMove = (x, y) => {
         if (!isAiming) return;
         const rect = courseElement.getBoundingClientRect();
-        const currentMousePos = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+        const currentMousePos = { x: x - rect.left, y: y - rect.top };
 
         let dx = ballPos.x - currentMousePos.x;
         let dy = ballPos.y - currentMousePos.y;
-        const dist = Math.hypot(dx, dy); // Plus court que Math.sqrt(dx*dx + dy*dy)
+        const dist = Math.hypot(dx, dy);
 
-        // Ajustement sensibilité visuelle ligne
-        const visualPowerRatio = Math.min(1, dist / (MAX_POWER * POWER_SENSITIVITY * 0.5)); // Ajuster le 0.5 pour la longueur max visuelle
+        const visualPowerRatio = Math.min(1, dist / (MAX_POWER * POWER_SENSITIVITY * 0.5));
         const endX = ballPos.x + dx * visualPowerRatio;
         const endY = ballPos.y + dy * visualPowerRatio;
 
         aimLineElement.setAttribute('x2', endX);
         aimLineElement.setAttribute('y2', endY);
-    });
+    };
 
-    courseElement.addEventListener('mousemove', (event) => {
-        const rect = courseElement.getBoundingClientRect();
-        const mouseX = event.clientX - rect.left;
-        const mouseY = event.clientY - rect.top;
-        mouseCoordsDisplay.textContent = `Mouse: (${mouseX.toFixed(2)}, ${mouseY.toFixed(2)})`;
-    });
-
-    document.addEventListener('mouseup', (event) => {
+    const handleAimEnd = (x, y) => {
         if (!isAiming) return;
         isAiming = false;
         aimLineElement.parentElement.style.visibility = 'hidden';
 
         const rect = courseElement.getBoundingClientRect();
-        const aimEndPos = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+        const aimEndPos = { x: x - rect.left, y: y - rect.top };
 
         let dx = ballPos.x - aimEndPos.x;
         let dy = ballPos.y - aimEndPos.y;
         const power = Math.hypot(dx, dy);
         const angle = Math.atan2(dy, dx);
 
-        // Ajuster la puissance réelle avec sensibilité
         const actualPower = Math.min(power / POWER_SENSITIVITY, MAX_POWER);
 
-        if (actualPower > 0.5) { // Seuil minimum pour tirer
+        if (actualPower > 0.5) {
             ballVel.x = Math.cos(angle) * actualPower;
             ballVel.y = Math.sin(angle) * actualPower;
 
             if (selectedClub === 'wedge') {
-                ballVel.z = actualPower * 0.5; // Give it some upward velocity
+                ballVel.z = actualPower * 0.5;
             }
 
             strokes++;
             strokeCountElement.textContent = strokes;
-            showMessage("En jeu !", 'info'); // Utiliser le type info
+            showMessage("In play!", 'info');
             isMoving = true;
             if (animationFrameId) cancelAnimationFrame(animationFrameId);
             animationFrameId = requestAnimationFrame(update);
         } else {
-            showMessage(`Prêt pour le coup ${strokes + 1}. Visez !`);
+            showMessage(`Ready for stroke ${strokes + 1}.`);
         }
-    });
+    };
 
-    // Initialiser le jeu
+    // Mouse Events
+    courseElement.addEventListener('mousedown', (e) => { e.preventDefault(); handleAimStart(e.clientX, e.clientY); });
+    document.addEventListener('mousemove', (e) => { handleAimMove(e.clientX, e.clientY); });
+    document.addEventListener('mouseup', (e) => { handleAimEnd(e.clientX, e.clientY); });
+
+    // Touch Events
+    courseElement.addEventListener('touchstart', (e) => { e.preventDefault(); handleAimStart(e.touches[0].clientX, e.touches[0].clientY); });
+    document.addEventListener('touchmove', (e) => { handleAimMove(e.touches[0].clientX, e.touches[0].clientY); });
+    document.addEventListener('touchend', (e) => { handleAimEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY); });
+
+
+    // Initialize
     setupHole(0);
+    window.addEventListener('resize', () => setupHole(currentHoleIndex));
 });

@@ -1,10 +1,8 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    /* Police plus moderne */
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* Dégradé subtil en arrière-plan */
     background: linear-gradient(to bottom, #eef, #dde);
     min-height: 100vh;
     margin: 0;
@@ -14,7 +12,6 @@ body {
 
 h1 {
     color: #2a4;
-    /* Vert un peu plus foncé */
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
@@ -22,41 +19,34 @@ h1 {
     margin-bottom: 15px;
     font-size: 1.1em;
     background-color: #fff;
-    /* Fond blanc pour meilleure lisibilité */
     padding: 10px 20px;
     border-radius: 8px;
-    /* Coins plus arrondis */
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
-    /* Ombre plus prononcée */
     border: 1px solid #ccc;
 }
 
 #game-container {
     border: 3px solid #654321;
-    /* Bordure "bois" */
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
     border-radius: 5px;
-    /* Légers arrondis */
     background-color: #1a7a1a;
-    /* Vert de base si dégradé non supporté */
 }
 
 #course {
-    width: 700px;
-    /* Légèrement plus large */
-    height: 450px;
-    /* Dégradé radial pour simuler un éclairage central */
+    width: 90vw;
+    height: 57.85vw; /* Maintain 700/450 aspect ratio */
+    max-width: 700px;
+    max-height: 450px;
     background: radial-gradient(circle, #3ab03a, #2a8a2a);
     position: relative;
     overflow: hidden;
     cursor: crosshair;
     border-radius: 3px;
-    /* Pour correspondre au container */
 }
 
 #ball-shadow {
-    width: 20px;
-    height: 20px;
+    width: 2.8vmin;
+    height: 2.8vmin;
     background-color: rgba(0, 0, 0, 0.2);
     border-radius: 50%;
     position: absolute;
@@ -66,34 +56,26 @@ h1 {
 }
 
 #ball {
-    width: 20px;
-    height: 20px;
-    /* Dégradé radial pour effet 3D */
+    width: 2.8vmin;
+    height: 2.8vmin;
     background: radial-gradient(circle at 6px 6px, #ffffff, #f0f0f0, #e0e0e0);
     border-radius: 50%;
     position: absolute;
     transform: translate(-50%, -50%);
-    /* Petite ombre portée */
     box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
     z-index: 10;
-    /* S'assurer que la balle est au-dessus des obstacles */
 }
 
 #hole {
-    width: 32px;
-    /* Légèrement plus grand */
-    height: 32px;
-    /* Dégradé pour simuler la profondeur */
+    width: 4.5vmin;
+    height: 4.5vmin;
     background: radial-gradient(circle, #111 30%, #000 70%);
     border: none;
-    /* Enlever l'ancienne bordure */
     border-radius: 50%;
     position: absolute;
     transform: translate(-50%, -50%);
     box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.7);
-    /* Ombre intérieure */
     z-index: 1;
-    /* Sous la balle */
 }
 
 /* Drapeau pour le trou */
