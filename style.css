@@ -1,10 +1,10 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    /* Police plus moderne */
+    /* Modern font */
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* Dégradé subtil en arrière-plan */
+    /* Subtle background gradient */
     background: linear-gradient(to bottom, #eef, #dde);
     min-height: 100vh;
     margin: 0;
@@ -14,7 +14,7 @@ body {
 
 h1 {
     color: #2a4;
-    /* Vert un peu plus foncé */
+    /* Darker green */
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
@@ -22,83 +22,78 @@ h1 {
     margin-bottom: 15px;
     font-size: 1.1em;
     background-color: #fff;
-    /* Fond blanc pour meilleure lisibilité */
+    /* White background for better readability */
     padding: 10px 20px;
     border-radius: 8px;
-    /* Coins plus arrondis */
+    /* More rounded corners */
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
-    /* Ombre plus prononcée */
+    /* More pronounced shadow */
     border: 1px solid #ccc;
 }
 
 #game-container {
     border: 3px solid #654321;
-    /* Bordure "bois" */
+    /* "Wood" border */
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
     border-radius: 5px;
-    /* Légers arrondis */
+    /* Slight rounding */
     background-color: #1a7a1a;
-    /* Vert de base si dégradé non supporté */
+    /* Base green if gradient not supported */
 }
 
 #course {
-    width: 700px;
-    /* Légèrement plus large */
-    height: 450px;
-    /* Dégradé radial pour simuler un éclairage central */
+    width: 90vw;
+    height: 57.85vw; /* 450/700 * 90vw */
+    max-width: 700px;
+    max-height: 450px;
+    /* Radial gradient to simulate central lighting */
     background: radial-gradient(circle, #3ab03a, #2a8a2a);
     position: relative;
     overflow: hidden;
     cursor: crosshair;
     border-radius: 3px;
-    /* Pour correspondre au container */
+    /* To match the container */
 }
 
 #ball {
-    width: 20px;
-    height: 20px;
-    /* Dégradé radial pour effet 3D */
-    background: radial-gradient(circle at 6px 6px, #ffffff, #f0f0f0, #e0e0e0);
+    width: 2.8vmin; /* 20/700 * 100 */
+    height: 2.8vmin; /* 20/700 * 100 */
+    background: url('ball.svg') no-repeat center center;
+    background-size: contain;
     border-radius: 50%;
     position: absolute;
     transform: translate(-50%, -50%);
-    /* Petite ombre portée */
-    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
     z-index: 10;
-    /* S'assurer que la balle est au-dessus des obstacles */
+    /* Make sure the ball is above the obstacles */
 }
 
 #hole {
-    width: 32px;
-    /* Légèrement plus grand */
-    height: 32px;
-    /* Dégradé pour simuler la profondeur */
-    background: radial-gradient(circle, #111 30%, #000 70%);
+    width: 4.5vmin; /* 32/700 * 100 */
+    height: 4.5vmin; /* 32/700 * 100 */
+    background: url('hole.svg') no-repeat center center;
+    background-size: contain;
     border: none;
-    /* Enlever l'ancienne bordure */
     border-radius: 50%;
     position: absolute;
     transform: translate(-50%, -50%);
-    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.7);
-    /* Ombre intérieure */
     z-index: 1;
-    /* Sous la balle */
+    /* Under the ball */
 }
 
-/* Drapeau pour le trou */
+/* Flag for the hole */
 .flag {
     position: absolute;
     bottom: 50%;
-    /* Commence au centre du trou */
+    /* Starts at the center of the hole */
     left: 50%;
     width: 2px;
-    /* Mât */
+    /* Mast */
     height: 35px;
-    /* Hauteur du mât */
+    /* Mast height */
     background-color: #eee;
     transform-origin: bottom center;
     transform: translateX(-50%);
-    /* Centrer le mât */
+    /* Center the mast */
 }
 
 .flag::after {
@@ -106,60 +101,58 @@ h1 {
     position: absolute;
     top: 0;
     left: 100%;
-    /* À droite du mât */
+    /* To the right of the mast */
     width: 18px;
-    /* Largeur drapeau */
+    /* Flag width */
     height: 12px;
-    /* Hauteur drapeau */
+    /* Flag height */
     background-color: #ff3b30;
-    /* Rouge vif */
+    /* Bright red */
     box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 
-/* Styles communs pour obstacles */
+/* Common styles for obstacles */
 .obstacle {
     position: absolute;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
     z-index: 5;
-    /* Entre le trou et la balle */
+    /* Between the hole and the ball */
     border-radius: 3px;
-    /* Petit arrondi général */
+    /* Small general rounding */
 }
 
-/* Style Mur (ancien obstacle) */
+/* Wall style (old obstacle) */
 .obstacle-wall {
-    background: linear-gradient(to bottom, #a06f4a, #8b5a2b);
-    /* Dégradé bois/brique */
+    background: url('wall.svg');
+    background-size: cover;
     border: 1px solid #5a3d1a;
 }
 
-/* Style Eau */
+/* Water style */
 .obstacle-water {
-    background: linear-gradient(to bottom, #66bfff, #3399ff);
-    /* Dégradé bleu */
+    background: url('water.svg');
+    background-size: cover;
     box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3);
     border: 1px solid #1a75ff;
 }
 
-/* Style Sable */
+/* Sand style */
 .obstacle-sand {
-    background: #f4a460;
-    /* Sable */
-    background-image: url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23d2b48c' fill-opacity='0.4' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E");
-    /* Texture subtile */
+    background: url('sand.svg');
+    background-size: cover;
     box-shadow: inset 1px 1px 5px rgba(0, 0, 0, 0.2);
     border: 1px dashed #cdaa7c;
     border-radius: 5px;
 }
 
-/* Style Obstacle Circulaire (si ajouté plus tard) */
+/* Circular Obstacle style (if added later) */
 .obstacle-circle {
     background: linear-gradient(to bottom, #ccc, #999);
-    /* Métal */
+    /* Metal */
     border: 1px solid #666;
     border-radius: 50% !important;
-    /* Forcer le cercle */
+    /* Force circle */
 }
 
 
@@ -167,27 +160,54 @@ h1 {
     margin-top: 15px;
     font-size: 1.2em;
     color: #fff;
-    /* Texte blanc */
+    /* White text */
     min-height: 1.5em;
     font-weight: bold;
     background-color: #5c85d6;
-    /* Bleu plus soutenu */
+    /* More sustained blue */
     padding: 10px 18px;
-    /* Plus d'espace */
+    /* More space */
     border-radius: 20px;
-    /* Très arrondi */
+    /* Very rounded */
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
     text-align: center;
     transition: background-color 0.3s ease;
-    /* Transition douce */
+    /* Smooth transition */
 }
 
 #message-area.success {
     background-color: #28a745;
-    /* Vert succès */
+    /* Green success */
 }
 
 #message-area.penalty {
     background-color: #dc3545;
-    /* Rouge pénalité */
+    /* Red penalty */
+}
+
+/* Animation for the ball falling into the hole */
+.fall-in-hole {
+    animation: fall-in-hole 0.5s ease-in forwards;
+}
+
+@keyframes fall-in-hole {
+    from {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    to {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Animation for wall hit */
+.wall-hit {
+    animation: wall-hit 0.2s ease-in-out;
+}
+
+@keyframes wall-hit {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
 }
