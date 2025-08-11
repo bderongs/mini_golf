@@ -13,6 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const putterBtn = document.getElementById('putter-btn');
     const wedgeBtn = document.getElementById('wedge-btn');
     const ballShadowElement = document.getElementById('ball-shadow');
+    const versionDisplayElement = document.getElementById('version-display');
+
+    // Display version
+    versionDisplayElement.textContent = `Version: ${new Date().toISOString()}`;
 
     // Game State
     let selectedClub = 'putter';
@@ -363,12 +367,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Mettre à jour la position visuelle
+        // Mettre à jour la position visuelle
         updateElementPosition(ballElement, ballPos);
 
-        // --- Vérifier si dans le trou ---
         const holePos = getElementCenter(holeElement);
         const distToHole = distance(ballPos, holePos);
 
+        if (distToHole < HOLE_RADIUS * 2) {
+            console.log({
+                distToHole,
+                ballVel: { ...ballVel },
+                ballPos: { ...ballPos },
+                HOLE_RADIUS,
+                speed: Math.hypot(ballVel.x, ballVel.y)
+            });
+        }
+
+        // --- Vérifier si dans le trou ---
         if (ballPos.z === 0 && distToHole <= HOLE_RADIUS && Math.hypot(ballVel.x, ballVel.y) < 2) { // The center of the ball is over the hole and the speed is low
             isMoving = false;
             ballVel = { x: 0, y: 0, z: 0 };
@@ -391,7 +406,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // --- Arrêter si vitesse faible ---
-        if (Math.hypot(ballVel.x, ballVel.y) < MIN_VELOCITY) {
+        if (ballPos.z === 0 && Math.hypot(ballVel.x, ballVel.y) < MIN_VELOCITY) {
             isMoving = false;
             ballVel = { x: 0, y: 0, z: 0 };
             cancelAnimationFrame(animationFrameId);
