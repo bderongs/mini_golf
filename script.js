@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const versionDisplayElement = document.getElementById('version-display');
     const holeCoordsDisplay = document.getElementById('hole-coords-display');
     const mouseCoordsDisplay = document.getElementById('mouse-coords-display');
+    const liveHoleCoordsDisplay = document.getElementById('live-hole-coords-display');
 
     // Display version
     versionDisplayElement.textContent = `Version: ${new Date().toISOString()}`;
@@ -373,6 +374,8 @@ document.addEventListener('DOMContentLoaded', () => {
         updateElementPosition(ballElement, ballPos);
 
         const distToHole = distance(ballPos, currentHolePos);
+
+        liveHoleCoordsDisplay.textContent = `Live Hole: (${currentHolePos.x.toFixed(2)}, ${currentHolePos.y.toFixed(2)})`;
 
         if (distToHole < HOLE_RADIUS * 2) {
             console.log({
