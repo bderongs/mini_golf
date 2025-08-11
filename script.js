@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Trou 4: Bunker de sable avant le trou
         {
             start: { x: 100, y: 390 }, hole: { x: 600, y: 60 }, par: 5, obstacles: [
-                { x: 450, y: 40, width: 200, height: 100, type: 'sand' },
+                { x: 450, y: 80, width: 200, height: 100, type: 'sand' },
                 { x: 150, y: 150, width: 200, height: 50, type: 'wall' }
             ]
         },
