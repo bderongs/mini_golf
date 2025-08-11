@@ -328,6 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (distToHole < HOLE_RADIUS && Math.hypot(ballVel.x, ballVel.y) < 2) { // The center of the ball is over the hole and the speed is low
             isMoving = false;
+            ballVel = { x: 0, y: 0 };
             cancelAnimationFrame(animationFrameId);
             const holePar = holeData[currentHoleIndex].par;
             let scoreMsg = "";
