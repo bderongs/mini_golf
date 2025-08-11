@@ -10,6 +10,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalParElement = document.getElementById('total-par');
     const totalStrokesElement = document.getElementById('total-strokes');
     const aimLineElement = document.getElementById('aim-line').querySelector('line');
+    const putterBtn = document.getElementById('putter-btn');
+    const wedgeBtn = document.getElementById('wedge-btn');
+    const ballShadowElement = document.getElementById('ball-shadow');
+
+    // Game State
+    let selectedClub = 'putter';
+
+    // Club selection logic
+    putterBtn.addEventListener('click', () => {
+        selectedClub = 'putter';
+        putterBtn.classList.add('active');
+        wedgeBtn.classList.remove('active');
+    });
+
+    wedgeBtn.addEventListener('click', () => {
+        selectedClub = 'wedge';
+        wedgeBtn.classList.add('active');
+        putterBtn.classList.remove('active');
+    });
 
     // Constantes du jeu (ajout SAND_FRICTION)
     const NORMAL_FRICTION = 0.985; // Légèrement moins de friction par défaut
@@ -20,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const HOLE_RADIUS = 15;
     const BALL_RADIUS = 10;
     const WATER_PENALTY = 1; // Nombre de coups de pénalité pour l'eau
+    const GRAVITY = 0.2; // Gravity for the wedge shot
 
     // Données des trous (avec nouveaux types d'obstacles)
     const holeData = [
@@ -59,8 +79,8 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     // État du jeu
-    let ballPos = { x: 0, y: 0 };
-    let ballVel = { x: 0, y: 0 };
+    let ballPos = { x: 0, y: 0, z: 0 };
+    let ballVel = { x: 0, y: 0, z: 0 };
     let currentHoleIndex = 0;
     let strokes = 0;
     let totalStrokes = 0;
@@ -109,9 +129,9 @@ document.addEventListener('DOMContentLoaded', () => {
         currentHoleIndex = holeIndex;
         strokes = 0;
         isMoving = false;
-        ballVel = { x: 0, y: 0 };
+        ballVel = { x: 0, y: 0, z: 0 };
 
-        ballPos = { ...data.start };
+        ballPos = { ...data.start, z: 0 };
         const holePos = { ...data.hole };
 
         updateElementPosition(ballElement, ballPos);
@@ -205,12 +225,35 @@ document.addEventListener('DOMContentLoaded', () => {
     function update() {
         if (!isMoving) return;
 
-        // Déterminer la friction applicable
-        const currentFriction = isBallInSand(ballPos) ? SAND_FRICTION : NORMAL_FRICTION;
+        // Apply 3D physics if the ball is in the air
+        if (ballPos.z > 0 || ballVel.z > 0) {
+            ballVel.z -= GRAVITY;
+            ballPos.z += ballVel.z;
 
-        // Appliquer la friction
-        ballVel.x *= currentFriction;
-        ballVel.y *= currentFriction;
+            if (ballPos.z <= 0) {
+                ballPos.z = 0;
+                ballVel.z = 0;
+                ballShadowElement.style.display = 'none';
+                ballElement.style.transform = 'translate(-50%, -50%) scale(1)';
+            } else {
+                ballShadowElement.style.display = 'block';
+                const shadowScale = 1 + ballPos.z * 0.1;
+                const ballScale = 1 + ballPos.z * 0.05;
+                ballShadowElement.style.transform = `translate(-50%, -50%) scale(${shadowScale})`;
+                ballShadowElement.style.opacity = 0.5 - ballPos.z * 0.02;
+                updateElementPosition(ballShadowElement, ballPos);
+                ballElement.style.transform = `translate(-50%, -50%) scale(${ballScale})`;
+            }
+        }
+
+        // Déterminer la friction applicable
+        if (ballPos.z === 0) {
+            const currentFriction = isBallInSand(ballPos) ? SAND_FRICTION : NORMAL_FRICTION;
+
+            // Appliquer la friction
+            ballVel.x *= currentFriction;
+            ballVel.y *= currentFriction;
+        }
 
         // Mettre à jour la position
         const nextX = ballPos.x + ballVel.x;
@@ -238,15 +281,15 @@ document.addEventListener('DOMContentLoaded', () => {
             );
 
             if (collidesRect) {
-                if (obsType === 'water') {
+                if (obsType === 'water' && ballPos.z === 0) {
                     showMessage(`Splash ! Pénalité de ${WATER_PENALTY} coup(s).`, 'penalty');
                     strokes += WATER_PENALTY; // Ajouter pénalité
                     totalStrokes += WATER_PENALTY;
                     strokeCountElement.textContent = strokes;
                     totalStrokesElement.textContent = totalStrokes;
                     // Remettre la balle au début du trou
-                    ballPos = { ...holeData[currentHoleIndex].start };
-                    ballVel = { x: 0, y: 0 };
+                    ballPos = { ...holeData[currentHoleIndex].start, z: 0 };
+                    ballVel = { x: 0, y: 0, z: 0 };
                     isMoving = false;
                     potentialCollision = true; // Arrêter le traitement pour ce frame
                     updateElementPosition(ballElement, ballPos); // Mettre à jour visuellement
@@ -326,9 +369,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const holePos = getElementCenter(holeElement);
         const distToHole = distance(ballPos, holePos);
 
-        if (distToHole < HOLE_RADIUS && Math.hypot(ballVel.x, ballVel.y) < 2) { // The center of the ball is over the hole and the speed is low
+        if (ballPos.z === 0 && distToHole < HOLE_RADIUS && Math.hypot(ballVel.x, ballVel.y) < 2) { // The center of the ball is over the hole and the speed is low
             isMoving = false;
-            ballVel = { x: 0, y: 0 };
+            ballVel = { x: 0, y: 0, z: 0 };
             cancelAnimationFrame(animationFrameId);
             const holePar = holeData[currentHoleIndex].par;
             let scoreMsg = "";
@@ -413,6 +456,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (actualPower > 0.5) { // Seuil minimum pour tirer
             ballVel.x = Math.cos(angle) * actualPower;
             ballVel.y = Math.sin(angle) * actualPower;
+
+            if (selectedClub === 'wedge') {
+                ballVel.z = actualPower * 0.5; // Give it some upward velocity
+            }
 
             strokes++;
             strokeCountElement.textContent = strokes;

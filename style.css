@@ -54,6 +54,17 @@ h1 {
     /* Pour correspondre au container */
 }
 
+#ball-shadow {
+    width: 20px;
+    height: 20px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    z-index: 9;
+    display: none; /* Hidden by default */
+}
+
 #ball {
     width: 20px;
     height: 20px;
@@ -190,4 +201,28 @@ h1 {
 #message-area.penalty {
     background-color: #dc3545;
     /* Rouge pénalité */
+}
+
+#club-selection {
+    margin-bottom: 15px;
+}
+
+.club-btn {
+    padding: 8px 16px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f0f0f0;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.club-btn.active {
+    background-color: #2a4;
+    color: #fff;
+    border-color: #2a4;
+}
+
+.club-btn:not(.active):hover {
+    background-color: #e0e0e0;
 }
