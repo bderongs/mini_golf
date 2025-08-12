@@ -91,176 +91,30 @@ document.addEventListener('DOMContentLoaded', () => {
     let HOLE_RADIUS = 16;
     let BALL_RADIUS = 10;
 
-    // Hole data using percentages for responsive design
-    const holeData = [
-        // Hole 1: Simple curved fairway
-        {
-            start: { x: 8.57, y: 50 }, hole: { x: 91.43, y: 50 }, par: 3,
-            fairway: {
-                path: "M 35,180 C 100,120 600,120 665,180 L 665,270 C 600,330 100,330 35,270 Z",
-                physicsShapes: [{ type: 'rect', x: 5, y: 40, width: 90, height: 20 }]
-            },
-            obstacles: []
-        },
-        // Hole 2: Curved dog-leg
-        {
-            start: { x: 8.57, y: 13.33 }, hole: { x: 91.43, y: 86.67 }, par: 4,
-            fairway: {
-                path: "M 35,45 C 150,45 150,150 250,150 L 350,150 C 450,150 450,250 450,350 L 380,350 C 380,250 380,220 280,220 L 250,220 C 150,220 85,100 35,115 Z",
-                physicsShapes: [
-                    { type: 'rect', x: 5, y: 10, width: 50, height: 20 },
-                    { type: 'rect', x: 45, y: 10, width: 20, height: 80 }
-                ]
-            },
-            obstacles: [
-                { x: 47.14, y: 22.22, width: 5.71, height: 55.56, type: 'tree-patch' }
-            ]
-        },
-        // Hole 3: Fairway with a circular green
-        {
-            start: { x: 8.57, y: 50 }, hole: { x: 91.43, y: 50 }, par: 4,
-            fairway: {
-                // Path is a long rectangle joined with a circle
-                path: "M 35,202.5 A 10,10 0 0 1 35,247.5 L 580,247.5 A 45,45 0 1 1 580,202.5 Z",
-                physicsShapes: [
-                    { type: 'rect', x: 5, y: 45, width: 80, height: 10 },
-                    { type: 'circle', cx: 91.43, cy: 50, radius: 10 }
-                ]
-            },
-            obstacles: [
-                { x: 35.71, y: 33.33, width: 28.57, height: 33.33, type: 'water' }
-            ]
-        },
-        // Hole 4: Sand bunker - using old format for now
-        {
-            start: { x: 14.29, y: 86.67 }, hole: { x: 85.71, y: 13.33 }, par: 5,
-            fairway: {
-                path: "M 70,45 L 630,45 L 630,385 L 70,385 Z", // Simple rect
-                physicsShapes: [{ type: 'rect', x: 10, y: 10, width: 80, height: 80 }]
-            },
-            obstacles: [
-                { x: 64.29, y: 17.78, width: 28.57, height: 22.22, type: 'sand' },
-                { x: 21.43, y: 33.33, width: 28.57, height: 11.11, type: 'tree-patch' }
-            ]
-        },
-        // Hole 5: Combination
-        {
-            start: { x: 8.57, y: 13.33 }, hole: { x: 91.43, y: 86.67 }, par: 5, fairway: { path: "M 35,45 L 665,45 L 665,405 L 35,405 Z", physicsShapes: [{ type: 'rect', x: 5, y: 10, width: 90, height: 80 }] }, obstacles: [
-                { x: 21.43, y: 0, width: 14.29, height: 55.56, type: 'water' },
-                { x: 64.29, y: 44.44, width: 14.29, height: 55.56, type: 'water' },
-                { x: 42.86, y: 40, width: 14.29, height: 20, type: 'sand' }
-            ]
-        },
-        // Hole 6: The Maze
-        {
-            start: { x: 5, y: 5 }, hole: { x: 95, y: 95 }, par: 6, fairway: { path: "M 0,0 L 700,0 L 700,450 L 0,450 Z", physicsShapes: [{ type: 'rect', x: 0, y: 0, width: 100, height: 100 }] }, obstacles: [
-                { x: 0, y: 20, width: 70, height: 5, type: 'tree-patch' },
-                { x: 30, y: 40, width: 70, height: 5, type: 'tree-patch' },
-                { x: 0, y: 60, width: 70, height: 5, type: 'tree-patch' },
-                { x: 30, y: 80, width: 70, height: 5, type: 'tree-patch' }
-            ]
-        },
-        // Hole 7: The Island
-        {
-            start: { x: 50, y: 85 }, hole: { x: 50, y: 15 }, par: 3, fairway: { path: "M 315,22.5 L 385,22.5 L 385,427.5 L 315,427.5 Z", physicsShapes: [{ type: 'rect', x: 45, y: 5, width: 10, height: 90 }] }, obstacles: [
-                { x: 0, y: 0, width: 100, height: 100, type: 'water' },
-                { x: 40, y: 10, width: 20, height: 80, type: 'sand' }
-            ]
-        },
-        // Hole 8: Ricochet
-        {
-            start: { x: 10, y: 10 }, hole: { x: 90, y: 90 }, par: 4, fairway: { path: "M 35,22.5 L 665,22.5 L 665,427.5 L 35,427.5 Z", physicsShapes: [{ type: 'rect', x: 5, y: 5, width: 90, height: 90 }] }, obstacles: [
-                { x: 50, y: 0, width: 5, height: 50, type: 'tree-patch' },
-                { x: 50, y: 50, width: 5, height: 50, type: 'tree-patch', angle: 45 }
-            ]
-        },
-        // Hole 9: The Funnel
-        {
-            start: { x: 50, y: 10 }, hole: { x: 50, y: 90 }, par: 4, fairway: { path: "M 315,22.5 L 385,22.5 L 385,427.5 L 315,427.5 Z", physicsShapes: [{ type: 'rect', x: 45, y: 5, width: 10, height: 90 }] }, obstacles: [
-                { x: 20, y: 30, width: 5, height: 40, type: 'tree-patch' },
-                { x: 75, y: 30, width: 5, height: 40, type: 'tree-patch' }
-            ]
-        },
-        // Hole 10: The S
-        {
-            start: { x: 10, y: 90 }, hole: { x: 90, y: 10 }, par: 5, fairway: { path: "M 35,22.5 L 665,22.5 L 665,427.5 L 35,427.5 Z", physicsShapes: [{ type: 'rect', x: 5, y: 5, width: 90, height: 90 }] }, obstacles: [
-                { x: 20, y: 20, width: 60, height: 5, type: 'tree-patch' },
-                { x: 20, y: 75, width: 60, height: 5, type: 'tree-patch' }
-            ]
-        },
-        // Hole 11: Water Trap
-        {
-            start: { x: 10, y: 50 }, hole: { x: 90, y: 50 }, par: 4, fairway: { path: "M 35,180 L 665,180 L 665,270 L 35,270 Z", physicsShapes: [{ type: 'rect', x: 5, y: 40, width: 90, height: 20 }] }, obstacles: [
-                { x: 30, y: 40, width: 40, height: 20, type: 'water' }
-            ]
-        },
-        // Hole 12: Sand Pit
-        {
-            start: { x: 10, y: 10 }, hole: { x: 90, y: 90 }, par: 5, fairway: { path: "M 35,22.5 L 665,22.5 L 665,427.5 L 35,427.5 Z", physicsShapes: [{ type: 'rect', x: 5, y: 5, width: 90, height: 90 }] }, obstacles: [
-                { x: 20, y: 20, width: 60, height: 60, type: 'sand' },
-                { x: 50, y: 50, width: 10, height: 15, type: 'tree-patch', customClass: 'obstacle-tree' }
-            ]
-        },
-        // Hole 13: The Gauntlet
-        {
-            start: { x: 5, y: 50 }, hole: { x: 95, y: 50 }, par: 5, fairway: { path: "M 14,180 L 686,180 L 686,270 L 14,270 Z", physicsShapes: [{ type: 'rect', x: 2, y: 40, width: 96, height: 20 }] }, obstacles: [
-                { x: 20, y: 45, width: 5, height: 10, type: 'tree-patch' },
-                { x: 40, y: 45, width: 5, height: 10, type: 'tree-patch' },
-                { x: 60, y: 45, width: 5, height: 10, type: 'tree-patch' },
-                { x: 80, y: 45, width: 5, height: 10, type: 'tree-patch' }
-            ]
-        },
-        // Hole 14: The Bridge
-        {
-            start: { x: 10, y: 50 }, hole: { x: 90, y: 50 }, par: 4, fairway: { path: "M 35,216 L 665,216 L 665,234 L 35,234 Z", physicsShapes: [{ type: 'rect', x: 5, y: 48, width: 90, height: 4 }] }, obstacles: [
-                { x: 30, y: 0, width: 40, height: 45, type: 'water' },
-                { x: 30, y: 55, width: 40, height: 45, type: 'water' }
-            ]
-        },
-        // Hole 15: The L
-        {
-            start: { x: 10, y: 10 }, hole: { x: 90, y: 90 }, par: 4, fairway: { path: "M 35,22.5 L 665,22.5 L 665,427.5 L 35,427.5 Z", physicsShapes: [{ type: 'rect', x: 5, y: 5, width: 90, height: 90 }] }, obstacles: [
-                { x: 10, y: 50, width: 80, height: 5, type: 'tree-patch' },
-                { x: 85, y: 10, width: 5, height: 45, type: 'tree-patch' }
-            ]
-        },
-        // Hole 16: The U
-        {
-            start: { x: 10, y: 10 }, hole: { x: 90, y: 10 }, par: 5, fairway: { path: "M 35,22.5 L 665,22.5 L 665,427.5 L 35,427.5 Z", physicsShapes: [{ type: 'rect', x: 5, y: 5, width: 90, height: 90 }] }, obstacles: [
-                { x: 10, y: 20, width: 5, height: 70, type: 'tree-patch' },
-                { x: 10, y: 90, width: 80, height: 5, type: 'tree-patch' },
-                { x: 85, y: 20, width: 5, height: 70, type: 'tree-patch' }
-            ]
-        },
-        // Hole 17: Triple Threat
-        {
-            start: { x: 10, y: 50 }, hole: { x: 90, y: 50 }, par: 5, fairway: { path: "M 35,180 L 665,180 L 665,270 L 35,270 Z", physicsShapes: [{ type: 'rect', x: 5, y: 40, width: 90, height: 20 }] }, obstacles: [
-                { x: 30, y: 45, width: 10, height: 10, type: 'water' },
-                { x: 50, y: 45, width: 10, height: 10, type: 'sand' },
-                { x: 70, y: 45, width: 10, height: 10, type: 'tree-patch' }
-            ]
-        },
-        // Hole 18: The Long Putt
-        { start: { x: 5, y: 50 }, hole: { x: 95, y: 50 }, par: 3, fairway: { path: "M 14,180 L 686,180 L 686,270 L 14,270 Z", physicsShapes: [{ type: 'rect', x: 2, y: 40, width: 96, height: 20 }] }, obstacles: [] },
-        // Hole 19: The Spiral
-        {
-            start: { x: 50, y: 50 }, hole: { x: 50, y: 50 }, par: 6, fairway: { path: "M 175,112.5 L 525,112.5 L 525,337.5 L 175,337.5 Z", physicsShapes: [{ type: 'rect', x: 25, y: 25, width: 50, height: 50 }] }, obstacles: [
-                { x: 30, y: 30, width: 40, height: 5, type: 'tree-patch' },
-                { x: 30, y: 30, width: 5, height: 40, type: 'tree-patch' },
-                { x: 30, y: 70, width: 45, height: 5, type: 'tree-patch' },
-                { x: 70, y: 30, width: 5, height: 45, type: 'tree-patch' }
-            ]
-        },
-        // Hole 20: The Final Challenge
-        {
-            start: { x: 10, y: 10 }, hole: { x: 90, y: 90 }, par: 7, fairway: { path: "M 35,22.5 L 665,22.5 L 665,427.5 L 35,427.5 Z", physicsShapes: [{ type: 'rect', x: 5, y: 5, width: 90, height: 90 }] }, obstacles: [
-                { x: 0, y: 48, width: 30, height: 4, type: 'water' },
-                { x: 70, y: 48, width: 30, height: 4, type: 'water' },
-                { x: 48, y: 0, width: 4, height: 30, type: 'sand' },
-                { x: 48, y: 70, width: 4, height: 30, type: 'sand' }
-            ]
+    let holeData = [];
+    const NUM_LEVELS = 1; // Assuming 1 level for now, can be dynamic later
+
+    async function loadCourseData(levelIndex) {
+        try {
+            const response = await fetch(`courses/course${levelIndex + 1}.json`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error(`Could not load course ${levelIndex + 1}:`, error);
+            return null; // Return null on error
         }
-    ];
+    }
+
+    async function loadAllCourses() {
+        const coursePromises = [];
+        for (let i = 0; i < NUM_LEVELS; i++) {
+            coursePromises.push(loadCourseData(i));
+        }
+        const results = await Promise.all(coursePromises);
+        holeData = results.filter(data => data !== null);
+    }
 
     let strokes = 0;
     let totalStrokes = 0;
@@ -271,6 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let animationFrameId = null;
     let currentObstacles = [];
     let currentFairwayShapes = [];
+    let currentHoleIndex;
 
     // --- Utility Functions ---
     function getElementCenter(element) {
@@ -363,6 +218,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             const radius = shapeData.radius / 100 * Math.min(courseRect.width, courseRect.height);
                             shape = { type: 'circle', cx: cx, cy: cy, radius: radius };
                             break;
+                        case 'polygon':
+                            const points = shapeData.points.map(p => ({
+                                x: p.x / 100 * courseRect.width,
+                                y: p.y / 100 * courseRect.height
+                            }));
+                            shape = { type: 'polygon', points: points };
+                            break;
                     }
                     if (shape) currentFairwayShapes.push(shape);
                 });
@@ -380,15 +242,46 @@ document.addEventListener('DOMContentLoaded', () => {
                 const obsElement = document.createElement('div');
                 obsElement.classList.add('obstacle', `obstacle-${obsData.type}`);
 
-                const obsX = obsData.x / 100 * courseRect.width;
-                const obsY = obsData.y / 100 * courseRect.height;
-                const obsWidth = obsData.width / 100 * courseRect.width;
-                const obsHeight = obsData.height / 100 * courseRect.height;
+                const shape = obsData.shape;
+                let obsX, obsY, obsWidth, obsHeight;
 
-                obsElement.style.left = `${obsX}px`;
-                obsElement.style.top = `${obsY}px`;
-                obsElement.style.width = `${obsWidth}px`;
-                obsElement.style.height = `${obsHeight}px`;
+                if (shape.type === 'rect') {
+                    obsX = shape.x / 100 * courseRect.width;
+                    obsY = shape.y / 100 * courseRect.height;
+                    obsWidth = shape.width / 100 * courseRect.width;
+                    obsHeight = shape.height / 100 * courseRect.height;
+                    obsElement.style.left = `${obsX}px`;
+                    obsElement.style.top = `${obsY}px`;
+                    obsElement.style.width = `${obsWidth}px`;
+                    obsElement.style.height = `${obsHeight}px`;
+                } else if (shape.type === 'circle') {
+                    const cx = shape.cx / 100 * courseRect.width;
+                    const cy = shape.cy / 100 * courseRect.height;
+                    const radius = shape.radius / 100 * Math.min(courseRect.width, courseRect.height);
+                    obsX = cx - radius;
+                    obsY = cy - radius;
+                    obsWidth = obsHeight = radius * 2;
+                    obsElement.style.left = `${obsX}px`;
+                    obsElement.style.top = `${obsY}px`;
+                    obsElement.style.width = `${obsWidth}px`;
+                    obsElement.style.height = `${obsHeight}px`;
+                    obsElement.style.borderRadius = '50%';
+                } else if (shape.type === 'oval') {
+                    const cx = shape.cx / 100 * courseRect.width;
+                    const cy = shape.cy / 100 * courseRect.height;
+                    const rx = shape.rx / 100 * courseRect.width;
+                    const ry = shape.ry / 100 * courseRect.height;
+                    obsX = cx - rx;
+                    obsY = cy - ry;
+                    obsWidth = rx * 2;
+                    obsHeight = ry * 2;
+                    obsElement.style.left = `${obsX}px`;
+                    obsElement.style.top = `${obsY}px`;
+                    obsElement.style.width = `${obsWidth}px`;
+                    obsElement.style.height = `${obsHeight}px`;
+                    obsElement.style.borderRadius = '50%';
+                }
+
 
                 // Special handling for tree patches
                 if (obsData.type === 'tree-patch') {
@@ -414,10 +307,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Store pixel values in dataset for collision detection
                 obsElement.dataset.obsType = obsData.type;
-                obsElement.dataset.x = obsX;
-                obsElement.dataset.y = obsY;
-                obsElement.dataset.width = obsWidth;
-                obsElement.dataset.height = obsHeight;
+                obsElement.dataset.shape = JSON.stringify(shape);
+
 
                 courseElement.appendChild(obsElement);
                 currentObstacles.push(obsElement);
@@ -449,6 +340,19 @@ document.addEventListener('DOMContentLoaded', () => {
         showMessage(message, 'success');
     }
 
+    function isPointInPolygon(point, polygon) {
+        let isInside = false;
+        for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+            const xi = polygon[i].x, yi = polygon[i].y;
+            const xj = polygon[j].x, yj = polygon[j].y;
+
+            const intersect = ((yi > point.y) !== (yj > point.y))
+                && (point.x < (xj - xi) * (point.y - yi) / (yj - yi) + xi);
+            if (intersect) isInside = !isInside;
+        }
+        return isInside;
+    }
+
     function isBallInFairway(ballPos) {
         for (const shape of currentFairwayShapes) {
             if (shape.type === 'rect') {
@@ -460,24 +364,46 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (distance(ballPos, { x: shape.cx, y: shape.cy }) < shape.radius) {
                     return true;
                 }
+            } else if (shape.type === 'polygon') {
+                if (isPointInPolygon(ballPos, shape.points)) {
+                    return true;
+                }
             }
         }
         return false;
     }
 
     function getBallTerrain(currentBallPos) {
-        // Check for sand first, as it can be on the fairway
+        const courseRect = courseElement.getBoundingClientRect();
         for (const obs of currentObstacles) {
+            const shape = JSON.parse(obs.dataset.shape);
             if (obs.dataset.obsType === 'sand') {
-                const rect = {
-                    left: parseFloat(obs.dataset.x),
-                    top: parseFloat(obs.dataset.y),
-                    right: parseFloat(obs.dataset.x) + parseFloat(obs.dataset.width),
-                    bottom: parseFloat(obs.dataset.y) + parseFloat(obs.dataset.height)
-                };
-                if (currentBallPos.x > rect.left && currentBallPos.x < rect.right &&
-                    currentBallPos.y > rect.top && currentBallPos.y < rect.bottom) {
-                    return 'sand';
+                if (shape.type === 'rect') {
+                    const rect = {
+                        left: shape.x / 100 * courseRect.width,
+                        top: shape.y / 100 * courseRect.height,
+                        right: (shape.x + shape.width) / 100 * courseRect.width,
+                        bottom: (shape.y + shape.height) / 100 * courseRect.height
+                    };
+                    if (currentBallPos.x > rect.left && currentBallPos.x < rect.right &&
+                        currentBallPos.y > rect.top && currentBallPos.y < rect.bottom) {
+                        return 'sand';
+                    }
+                } else if (shape.type === 'circle') {
+                    const cx = shape.cx / 100 * courseRect.width;
+                    const cy = shape.cy / 100 * courseRect.height;
+                    const radius = shape.radius / 100 * Math.min(courseRect.width, courseRect.height);
+                    if (distance(currentBallPos, { x: cx, y: cy }) < radius) {
+                        return 'sand';
+                    }
+                } else if (shape.type === 'oval') {
+                    const cx = shape.cx / 100 * courseRect.width;
+                    const cy = shape.cy / 100 * courseRect.height;
+                    const rx = shape.rx / 100 * courseRect.width;
+                    const ry = shape.ry / 100 * courseRect.height;
+                    if (Math.pow(currentBallPos.x - cx, 2) / Math.pow(rx, 2) + Math.pow(currentBallPos.y - cy, 2) / Math.pow(ry, 2) < 1) {
+                        return 'sand';
+                    }
                 }
             }
         }
@@ -535,67 +461,100 @@ document.addEventListener('DOMContentLoaded', () => {
         for (const obs of currentObstacles) {
             if (potentialCollision) break;
             const obsType = obs.dataset.obsType;
-            const obsRect = {
-                left: parseFloat(obs.dataset.x),
-                top: parseFloat(obs.dataset.y),
-                right: parseFloat(obs.dataset.x) + parseFloat(obs.dataset.width),
-                bottom: parseFloat(obs.dataset.y) + parseFloat(obs.dataset.height)
-            };
+            const shape = JSON.parse(obs.dataset.shape);
+            const courseRect = courseElement.getBoundingClientRect();
+            let collides = false;
 
-            const collidesRect = (
-                nextX + BALL_RADIUS > obsRect.left &&
-                nextX - BALL_RADIUS < obsRect.right &&
-                nextY + BALL_RADIUS > obsRect.top &&
-                nextY - BALL_RADIUS < obsRect.bottom
-            );
+            if (shape.type === 'rect') {
+                const rect = {
+                    left: shape.x / 100 * courseRect.width,
+                    top: shape.y / 100 * courseRect.height,
+                    right: (shape.x + shape.width) / 100 * courseRect.width,
+                    bottom: (shape.y + shape.height) / 100 * courseRect.height
+                };
+                collides = (
+                    nextX + BALL_RADIUS > rect.left &&
+                    nextX - BALL_RADIUS < rect.right &&
+                    nextY + BALL_RADIUS > rect.top &&
+                    nextY - BALL_RADIUS < rect.bottom
+                );
 
-            if (collidesRect) {
-                if (obsType === 'water' && ballPos.z === 0) {
-                    showMessage(`Splash! ${WATER_PENALTY} stroke penalty.`, 'penalty');
-                    strokes += WATER_PENALTY;
-                    totalStrokes += WATER_PENALTY;
-                    strokeCountElement.textContent = strokes;
-                    totalStrokesElement.textContent = totalStrokes;
-                    // Reset ball position
-                    const courseRect = courseElement.getBoundingClientRect();
-                    ballPos = {
-                        x: holeData[currentHoleIndex].start.x / 100 * courseRect.width,
-                        y: holeData[currentHoleIndex].start.y / 100 * courseRect.height,
-                        z: 0
-                    };
-                    ballVel = { x: 0, y: 0, z: 0 };
-                    isMoving = false;
-                    potentialCollision = true;
-                    updateElementPosition(ballElement, ballPos);
-                    setTimeout(() => showMessage(`Ready for stroke ${strokes + 1}.`), 1000);
-                    break;
-                } else if (obsType === 'tree-patch') {
-                    let collideX = false;
-                    let collideY = false;
-
-                    if (ballPos.y + BALL_RADIUS > obsRect.top && ballPos.y - BALL_RADIUS < obsRect.bottom) {
-                        if ((ballPos.x + BALL_RADIUS <= obsRect.left && nextX + BALL_RADIUS > obsRect.left) ||
-                            (ballPos.x - BALL_RADIUS >= obsRect.right && nextX - BALL_RADIUS < obsRect.right)) {
+                if (collides && obsType === 'tree-patch') {
+                    // More precise collision for tree patches
+                    if (ballPos.y + BALL_RADIUS > rect.top && ballPos.y - BALL_RADIUS < rect.bottom) {
+                        if ((ballPos.x + BALL_RADIUS <= rect.left && nextX + BALL_RADIUS > rect.left) ||
+                            (ballPos.x - BALL_RADIUS >= rect.right && nextX - BALL_RADIUS < rect.right)) {
                             ballVel.x *= -1;
-                            ballPos.x = (ballVel.x > 0) ? obsRect.left - BALL_RADIUS - 0.1 : obsRect.right + BALL_RADIUS + 0.1;
-                            collideX = true;
                         }
                     }
-                    if (!collideX && ballPos.x + BALL_RADIUS > obsRect.left && ballPos.x - BALL_RADIUS < obsRect.right) {
-                        if ((ballPos.y + BALL_RADIUS <= obsRect.top && nextY + BALL_RADIUS > obsRect.top) ||
-                            (ballPos.y - BALL_RADIUS >= obsRect.bottom && nextY - BALL_RADIUS < obsRect.bottom)) {
+                    if (ballPos.x + BALL_RADIUS > rect.left && ballPos.x - BALL_RADIUS < rect.right) {
+                        if ((ballPos.y + BALL_RADIUS <= rect.top && nextY + BALL_RADIUS > rect.top) ||
+                            (ballPos.y - BALL_RADIUS >= rect.bottom && nextY - BALL_RADIUS < rect.bottom)) {
                             ballVel.y *= -1;
-                            ballPos.y = (ballVel.y > 0) ? obsRect.top - BALL_RADIUS - 0.1 : obsRect.bottom + BALL_RADIUS + 0.1;
-                            collideY = true;
-                        }
-                    }
-                    if (collideX || collideY) {
-                        potentialCollision = true;
-                        if (ballPos.z > 0) {
-                            ballVel.z *= 0.8; // Lose some vertical velocity on wall hit
                         }
                     }
                 }
+
+            } else if (shape.type === 'circle') {
+                const cx = shape.cx / 100 * courseRect.width;
+                const cy = shape.cy / 100 * courseRect.height;
+                const radius = shape.radius / 100 * Math.min(courseRect.width, courseRect.height);
+                if (distance({x: nextX, y: nextY}, { x: cx, y: cy }) < radius + BALL_RADIUS) {
+                    collides = true;
+                    if (obsType === 'tree-patch') {
+                        // Reflect velocity vector
+                        const normal = { x: nextX - cx, y: nextY - cy };
+                        const normalMag = Math.hypot(normal.x, normal.y);
+                        normal.x /= normalMag;
+                        normal.y /= normalMag;
+                        const dot = ballVel.x * normal.x + ballVel.y * normal.y;
+                        ballVel.x -= 2 * dot * normal.x;
+                        ballVel.y -= 2 * dot * normal.y;
+                    }
+                }
+            } else if (shape.type === 'oval') {
+                const cx = shape.cx / 100 * courseRect.width;
+                const cy = shape.cy / 100 * courseRect.height;
+                const rx = shape.rx / 100 * courseRect.width;
+                const ry = shape.ry / 100 * courseRect.height;
+                // Simplified collision for ovals - treat as a bounding box for collision response
+                 const rect = { left: cx - rx, top: cy - ry, right: cx + rx, bottom: cy + ry };
+                 if (nextX + BALL_RADIUS > rect.left && nextX - BALL_RADIUS < rect.right &&
+                     nextY + BALL_RADIUS > rect.top && nextY - BALL_RADIUS < rect.bottom) {
+
+                    if (Math.pow(nextX - cx, 2) / Math.pow(rx, 2) + Math.pow(nextY - cy, 2) / Math.pow(ry, 2) < 1) {
+                         collides = true;
+                         if (obsType === 'tree-patch') {
+                            // Simplified reflection
+                            if (nextX > cx - rx && nextX < cx + rx) ballVel.y *= -1;
+                            else if (nextY > cy - ry && nextY < cy + ry) ballVel.x *= -1;
+                            else { // Corner, reflect both
+                                ballVel.x *= -1;
+                                ballVel.y *= -1;
+                            }
+                         }
+                    }
+                 }
+            }
+
+            if (collides && obsType === 'water' && ballPos.z === 0) {
+                showMessage(`Splash! ${WATER_PENALTY} stroke penalty.`, 'penalty');
+                strokes += WATER_PENALTY;
+                totalStrokes += WATER_PENALTY;
+                strokeCountElement.textContent = strokes;
+                totalStrokesElement.textContent = totalStrokes;
+                // Reset ball position
+                ballPos = {
+                    x: holeData[currentHoleIndex].start.x / 100 * courseRect.width,
+                    y: holeData[currentHoleIndex].start.y / 100 * courseRect.height,
+                    z: 0
+                };
+                ballVel = { x: 0, y: 0, z: 0 };
+                isMoving = false;
+                potentialCollision = true;
+                updateElementPosition(ballElement, ballPos);
+                setTimeout(() => showMessage(`Ready for stroke ${strokes + 1}.`), 1000);
+                break;
             }
         }
 
@@ -756,12 +715,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // Initialize
-    // setupHole(0);
     window.addEventListener('resize', () => {
-        if (gameMode === 'campaign') {
+        if (gameMode === 'campaign' && typeof currentHoleIndex !== 'undefined' && holeData.length > 0) {
             setupHole(currentHoleIndex);
         }
     });
 
-    showLevelSelection();
+    async function initializeGame() {
+        await loadAllCourses();
+        showLevelSelection();
+    }
+
+    initializeGame();
 });
