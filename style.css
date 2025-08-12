@@ -37,11 +37,19 @@ h1 {
     height: 57.85vw; /* Maintain 700/450 aspect ratio */
     max-width: 700px;
     max-height: 450px;
-    background-image: url('grass_texture.svg');
+    background-image: url('rough_texture.svg');
+    background-color: #2a8a2a; /* Fallback color */
     position: relative;
     overflow: hidden;
     cursor: crosshair;
     border-radius: 3px;
+}
+
+.fairway {
+    position: absolute;
+    background-image: url('grass_texture.svg');
+    background-color: #3ab03a; /* Fallback color */
+    z-index: 1;
 }
 
 #ball-shadow {
@@ -114,8 +122,7 @@ h1 {
 .obstacle {
     position: absolute;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
-    z-index: 5;
-    /* Entre le trou et la balle */
+    z-index: 6; /* Higher than fairway */
     border-radius: 3px;
     /* Petit arrondi général */
 }
