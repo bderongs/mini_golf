@@ -165,7 +165,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Hole 12: Sand Pit
         {
             start: { x: 10, y: 10 }, hole: { x: 90, y: 90 }, par: 5, obstacles: [
-                { x: 20, y: 20, width: 60, height: 60, type: 'sand' }
+                { x: 20, y: 20, width: 60, height: 60, type: 'sand' },
+                { x: 50, y: 50, width: 10, height: 15, type: 'wall', customClass: 'obstacle-tree' }
             ]
         },
         // Hole 13: The Gauntlet
@@ -305,6 +306,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const obsElement = document.createElement('div');
                 obsElement.classList.add('obstacle');
                 obsElement.classList.add(`obstacle-${obsData.type}`);
+                if (obsData.customClass) {
+                    obsElement.classList.add(obsData.customClass);
+                }
 
                 const obsX = obsData.x / 100 * courseRect.width;
                 const obsY = obsData.y / 100 * courseRect.height;

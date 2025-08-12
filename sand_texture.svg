@@ -1,0 +1,15 @@
+<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <filter id="sandFilter">
+            <feTurbulence type="fractalNoise" baseFrequency="0.6" numOctaves="3" result="turbulence" />
+            <feColorMatrix in="turbulence" type="saturate" values="0" result="grayscale" />
+            <feComponentTransfer in="grayscale" result="colormatrix">
+                <feFuncR type="table" tableValues="0.8 1" />
+                <feFuncG type="table" tableValues="0.7 0.9" />
+                <feFuncB type="table" tableValues="0.5 0.7" />
+            </feComponentTransfer>
+        </filter>
+    </defs>
+    <rect width="100" height="100" fill="#f4a460" />
+    <rect width="100" height="100" filter="url(#sandFilter)" />
+</svg>

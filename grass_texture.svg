@@ -1,0 +1,15 @@
+<svg width="50" height="50" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <filter id="grassFilter">
+            <feTurbulence type="fractalNoise" baseFrequency="0.2" numOctaves="3" result="turbulence"/>
+            <feColorMatrix in="turbulence" type="saturate" values="0.5" result="grayscale"/>
+            <feComponentTransfer in="grayscale" result="colormatrix">
+                <feFuncR type="table" tableValues="0.1 0.4"/>
+                <feFuncG type="table" tableValues="0.3 0.8"/>
+                <feFuncB type="table" tableValues="0.1 0.4"/>
+            </feComponentTransfer>
+        </filter>
+    </defs>
+    <rect width="50" height="50" fill="#3ab03a"/>
+    <rect width="50" height="50" filter="url(#grassFilter)" opacity="0.5"/>
+</svg>
