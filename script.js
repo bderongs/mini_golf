@@ -23,6 +23,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Game State
     let selectedClub = 'putter';
+    let gameMode = 'campaign'; // 'campaign' or 'free-play'
+
+    // --- Screen Management ---
+    const levelSelectionScreen = document.getElementById('level-selection-screen');
+    const gameUI = document.getElementById('game-ui');
+    const levelList = document.getElementById('level-list');
+    const playAllBtn = document.getElementById('play-all-btn');
+
+    function showLevelSelection() {
+        levelSelectionScreen.style.display = 'block';
+        gameUI.style.display = 'none';
+        levelList.innerHTML = ''; // Clear previous buttons
+
+        holeData.forEach((hole, index) => {
+            const levelBtn = document.createElement('button');
+            levelBtn.textContent = `Level ${index + 1}`;
+            levelBtn.classList.add('level-btn');
+            levelBtn.addEventListener('click', () => {
+                gameMode = 'free-play';
+                startGame(index);
+            });
+            levelList.appendChild(levelBtn);
+        });
+    }
+
+    function showGameUI() {
+        levelSelectionScreen.style.display = 'none';
+        gameUI.style.display = 'block';
+    }
+
+    function startGame(levelIndex) {
+        showGameUI();
+        setupHole(levelIndex);
+    }
+
+    playAllBtn.addEventListener('click', () => {
+        gameMode = 'campaign';
+        startGame(0);
+    });
+
 
     // Club selection logic
     putterBtn.addEventListener('click', () => {
@@ -79,6 +119,114 @@ document.addEventListener('DOMContentLoaded', () => {
                 { x: 42.86, y: 40, width: 14.29, height: 20, type: 'sand' }
             ]
         },
+        // Hole 6: The Maze
+        {
+            start: { x: 5, y: 5 }, hole: { x: 95, y: 95 }, par: 6, obstacles: [
+                { x: 0, y: 20, width: 70, height: 5, type: 'wall' },
+                { x: 30, y: 40, width: 70, height: 5, type: 'wall' },
+                { x: 0, y: 60, width: 70, height: 5, type: 'wall' },
+                { x: 30, y: 80, width: 70, height: 5, type: 'wall' }
+            ]
+        },
+        // Hole 7: The Island
+        {
+            start: { x: 50, y: 85 }, hole: { x: 50, y: 15 }, par: 3, obstacles: [
+                { x: 0, y: 0, width: 100, height: 100, type: 'water' },
+                { x: 40, y: 10, width: 20, height: 80, type: 'sand' }
+            ]
+        },
+        // Hole 8: Ricochet
+        {
+            start: { x: 10, y: 10 }, hole: { x: 90, y: 90 }, par: 4, obstacles: [
+                { x: 50, y: 0, width: 5, height: 50, type: 'wall' },
+                { x: 50, y: 50, width: 5, height: 50, type: 'wall', angle: 45 }
+            ]
+        },
+        // Hole 9: The Funnel
+        {
+            start: { x: 50, y: 10 }, hole: { x: 50, y: 90 }, par: 4, obstacles: [
+                { x: 20, y: 30, width: 5, height: 40, type: 'wall' },
+                { x: 75, y: 30, width: 5, height: 40, type: 'wall' }
+            ]
+        },
+        // Hole 10: The S
+        {
+            start: { x: 10, y: 90 }, hole: { x: 90, y: 10 }, par: 5, obstacles: [
+                { x: 20, y: 20, width: 60, height: 5, type: 'wall' },
+                { x: 20, y: 75, width: 60, height: 5, type: 'wall' }
+            ]
+        },
+        // Hole 11: Water Trap
+        {
+            start: { x: 10, y: 50 }, hole: { x: 90, y: 50 }, par: 4, obstacles: [
+                { x: 30, y: 40, width: 40, height: 20, type: 'water' }
+            ]
+        },
+        // Hole 12: Sand Pit
+        {
+            start: { x: 10, y: 10 }, hole: { x: 90, y: 90 }, par: 5, obstacles: [
+                { x: 20, y: 20, width: 60, height: 60, type: 'sand' }
+            ]
+        },
+        // Hole 13: The Gauntlet
+        {
+            start: { x: 5, y: 50 }, hole: { x: 95, y: 50 }, par: 5, obstacles: [
+                { x: 20, y: 45, width: 5, height: 10, type: 'wall' },
+                { x: 40, y: 45, width: 5, height: 10, type: 'wall' },
+                { x: 60, y: 45, width: 5, height: 10, type: 'wall' },
+                { x: 80, y: 45, width: 5, height: 10, type: 'wall' }
+            ]
+        },
+        // Hole 14: The Bridge
+        {
+            start: { x: 10, y: 50 }, hole: { x: 90, y: 50 }, par: 4, obstacles: [
+                { x: 30, y: 0, width: 40, height: 45, type: 'water' },
+                { x: 30, y: 55, width: 40, height: 45, type: 'water' }
+            ]
+        },
+        // Hole 15: The L
+        {
+            start: { x: 10, y: 10 }, hole: { x: 90, y: 90 }, par: 4, obstacles: [
+                { x: 10, y: 50, width: 80, height: 5, type: 'wall' },
+                { x: 85, y: 10, width: 5, height: 45, type: 'wall' }
+            ]
+        },
+        // Hole 16: The U
+        {
+            start: { x: 10, y: 10 }, hole: { x: 90, y: 10 }, par: 5, obstacles: [
+                { x: 10, y: 20, width: 5, height: 70, type: 'wall' },
+                { x: 10, y: 90, width: 80, height: 5, type: 'wall' },
+                { x: 85, y: 20, width: 5, height: 70, type: 'wall' }
+            ]
+        },
+        // Hole 17: Triple Threat
+        {
+            start: { x: 10, y: 50 }, hole: { x: 90, y: 50 }, par: 5, obstacles: [
+                { x: 30, y: 45, width: 10, height: 10, type: 'water' },
+                { x: 50, y: 45, width: 10, height: 10, type: 'sand' },
+                { x: 70, y: 45, width: 10, height: 10, type: 'wall' }
+            ]
+        },
+        // Hole 18: The Long Putt
+        { start: { x: 5, y: 50 }, hole: { x: 95, y: 50 }, par: 3, obstacles: [] },
+        // Hole 19: The Spiral
+        {
+            start: { x: 50, y: 50 }, hole: { x: 50, y: 50 }, par: 6, obstacles: [
+                { x: 30, y: 30, width: 40, height: 5, type: 'wall' },
+                { x: 30, y: 30, width: 5, height: 40, type: 'wall' },
+                { x: 30, y: 70, width: 45, height: 5, type: 'wall' },
+                { x: 70, y: 30, width: 5, height: 45, type: 'wall' }
+            ]
+        },
+        // Hole 20: The Final Challenge
+        {
+            start: { x: 10, y: 10 }, hole: { x: 90, y: 90 }, par: 7, obstacles: [
+                { x: 0, y: 48, width: 30, height: 4, type: 'water' },
+                { x: 70, y: 48, width: 30, height: 4, type: 'water' },
+                { x: 48, y: 0, width: 4, height: 30, type: 'sand' },
+                { x: 48, y: 70, width: 4, height: 30, type: 'sand' }
+            ]
+        }
     ];
 
     let strokes = 0;
@@ -368,12 +516,18 @@ document.addEventListener('DOMContentLoaded', () => {
             else scoreMsg = ` (+${strokes - holePar} over par)`;
 
             showMessage(`Hole ${currentHoleIndex + 1} completed in ${strokes} strokes!${scoreMsg}`, 'success');
-            totalStrokes += strokes;
-            totalStrokesElement.textContent = totalStrokes;
 
-            setTimeout(() => {
-                setupHole(currentHoleIndex + 1);
-            }, 2000);
+            if (gameMode === 'campaign') {
+                totalStrokes += strokes;
+                totalStrokesElement.textContent = totalStrokes;
+                setTimeout(() => {
+                    setupHole(currentHoleIndex + 1);
+                }, 2000);
+            } else {
+                setTimeout(() => {
+                    showLevelSelection();
+                }, 2000);
+            }
             return;
         }
 
@@ -465,6 +619,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // Initialize
-    setupHole(0);
-    window.addEventListener('resize', () => setupHole(currentHoleIndex));
+    // setupHole(0);
+    window.addEventListener('resize', () => {
+        if (gameMode === 'campaign') {
+            setupHole(currentHoleIndex);
+        }
+    });
+
+    showLevelSelection();
 });
