@@ -80,148 +80,168 @@ document.addEventListener('DOMContentLoaded', () => {
     // Game Constants
     const NORMAL_FRICTION = 0.985;
     const SAND_FRICTION = 0.88;
+    const ROUGH_FRICTION = 0.95;
     const MIN_VELOCITY = 0.08;
     const MAX_POWER = 18;
     const POWER_SENSITIVITY = 12;
     const WATER_PENALTY = 1;
+    const OUT_OF_BOUNDS_PENALTY = 1;
     const GRAVITY = 0.2;
     let HOLE_RADIUS = 16;
     let BALL_RADIUS = 10;
 
     // Hole data using percentages for responsive design
     const holeData = [
-        // Hole 1: Simple
-        { start: { x: 8.57, y: 50 }, hole: { x: 91.43, y: 50 }, par: 3, obstacles: [] },
-        // Hole 2: Center wall
+        // Hole 1: Simple - Now using the new format
         {
-            start: { x: 8.57, y: 13.33 }, hole: { x: 91.43, y: 86.67 }, par: 4, obstacles: [
+            start: { x: 8.57, y: 50 }, hole: { x: 91.43, y: 50 }, par: 3,
+            fairway: [
+                { type: 'rect', x: 5, y: 40, width: 90, height: 20 }
+            ],
+            obstacles: []
+        },
+        // Hole 2: Dog-leg shape
+        {
+            start: { x: 8.57, y: 13.33 }, hole: { x: 91.43, y: 86.67 }, par: 4,
+            fairway: [
+                { type: 'rect', x: 5, y: 10, width: 50, height: 20 },
+                { type: 'rect', x: 45, y: 10, width: 20, height: 80 }
+            ],
+            obstacles: [
                 { x: 47.14, y: 22.22, width: 5.71, height: 55.56, type: 'wall' }
             ]
         },
-        // Hole 3: Water hazard
+        // Hole 3: Fairway with a circular green
         {
-            start: { x: 8.57, y: 50 }, hole: { x: 91.43, y: 50 }, par: 4, obstacles: [
+            start: { x: 8.57, y: 50 }, hole: { x: 91.43, y: 50 }, par: 4,
+            fairway: [
+                { type: 'rect', x: 5, y: 45, width: 80, height: 10 },
+                { type: 'circle', cx: 91.43, cy: 50, radius: 10 }
+            ],
+            obstacles: [
                 { x: 35.71, y: 33.33, width: 28.57, height: 33.33, type: 'water' }
             ]
         },
-        // Hole 4: Sand bunker
+        // Hole 4: Sand bunker - using old format for now
         {
-            start: { x: 14.29, y: 86.67 }, hole: { x: 85.71, y: 13.33 }, par: 5, obstacles: [
+            start: { x: 14.29, y: 86.67 }, hole: { x: 85.71, y: 13.33 }, par: 5,
+            fairway: [{ type: 'rect', x: 10, y: 10, width: 80, height: 80 }],
+            obstacles: [
                 { x: 64.29, y: 17.78, width: 28.57, height: 22.22, type: 'sand' },
                 { x: 21.43, y: 33.33, width: 28.57, height: 11.11, type: 'wall' }
             ]
         },
-        // Hole 5: Combination
+        // Hole 5: Combination - using old format for now
         {
-            start: { x: 8.57, y: 13.33 }, hole: { x: 91.43, y: 86.67 }, par: 5, obstacles: [
+            start: { x: 8.57, y: 13.33 }, hole: { x: 91.43, y: 86.67 }, par: 5, fairway: [{ type: 'rect', x: 5, y: 10, width: 90, height: 80 }], obstacles: [
                 { x: 21.43, y: 0, width: 14.29, height: 55.56, type: 'water' },
                 { x: 64.29, y: 44.44, width: 14.29, height: 55.56, type: 'water' },
                 { x: 42.86, y: 40, width: 14.29, height: 20, type: 'sand' }
             ]
         },
-        // Hole 6: The Maze
+        // Hole 6: The Maze - using old format for now
         {
-            start: { x: 5, y: 5 }, hole: { x: 95, y: 95 }, par: 6, obstacles: [
+            start: { x: 5, y: 5 }, hole: { x: 95, y: 95 }, par: 6, fairway: [{ type: 'rect', x: 0, y: 0, width: 100, height: 100 }], obstacles: [
                 { x: 0, y: 20, width: 70, height: 5, type: 'wall' },
                 { x: 30, y: 40, width: 70, height: 5, type: 'wall' },
                 { x: 0, y: 60, width: 70, height: 5, type: 'wall' },
                 { x: 30, y: 80, width: 70, height: 5, type: 'wall' }
             ]
         },
-        // Hole 7: The Island
+        // Hole 7: The Island - using old format for now
         {
-            start: { x: 50, y: 85 }, hole: { x: 50, y: 15 }, par: 3, obstacles: [
+            start: { x: 50, y: 85 }, hole: { x: 50, y: 15 }, par: 3, fairway: [{ type: 'rect', x: 45, y: 5, width: 10, height: 90 }], obstacles: [
                 { x: 0, y: 0, width: 100, height: 100, type: 'water' },
                 { x: 40, y: 10, width: 20, height: 80, type: 'sand' }
             ]
         },
-        // Hole 8: Ricochet
+        // Hole 8: Ricochet - using old format for now
         {
-            start: { x: 10, y: 10 }, hole: { x: 90, y: 90 }, par: 4, obstacles: [
+            start: { x: 10, y: 10 }, hole: { x: 90, y: 90 }, par: 4, fairway: [{ type: 'rect', x: 5, y: 5, width: 90, height: 90 }], obstacles: [
                 { x: 50, y: 0, width: 5, height: 50, type: 'wall' },
                 { x: 50, y: 50, width: 5, height: 50, type: 'wall', angle: 45 }
             ]
         },
-        // Hole 9: The Funnel
+        // Hole 9: The Funnel - using old format for now
         {
-            start: { x: 50, y: 10 }, hole: { x: 50, y: 90 }, par: 4, obstacles: [
+            start: { x: 50, y: 10 }, hole: { x: 50, y: 90 }, par: 4, fairway: [{ type: 'rect', x: 45, y: 5, width: 10, height: 90 }], obstacles: [
                 { x: 20, y: 30, width: 5, height: 40, type: 'wall' },
                 { x: 75, y: 30, width: 5, height: 40, type: 'wall' }
             ]
         },
-        // Hole 10: The S
+        // Hole 10: The S - using old format for now
         {
-            start: { x: 10, y: 90 }, hole: { x: 90, y: 10 }, par: 5, obstacles: [
+            start: { x: 10, y: 90 }, hole: { x: 90, y: 10 }, par: 5, fairway: [{ type: 'rect', x: 5, y: 5, width: 90, height: 90 }], obstacles: [
                 { x: 20, y: 20, width: 60, height: 5, type: 'wall' },
                 { x: 20, y: 75, width: 60, height: 5, type: 'wall' }
             ]
         },
-        // Hole 11: Water Trap
+        // Hole 11: Water Trap - using old format for now
         {
-            start: { x: 10, y: 50 }, hole: { x: 90, y: 50 }, par: 4, obstacles: [
+            start: { x: 10, y: 50 }, hole: { x: 90, y: 50 }, par: 4, fairway: [{ type: 'rect', x: 5, y: 40, width: 90, height: 20 }], obstacles: [
                 { x: 30, y: 40, width: 40, height: 20, type: 'water' }
             ]
         },
-        // Hole 12: Sand Pit
+        // Hole 12: Sand Pit - using old format for now
         {
-            start: { x: 10, y: 10 }, hole: { x: 90, y: 90 }, par: 5, obstacles: [
+            start: { x: 10, y: 10 }, hole: { x: 90, y: 90 }, par: 5, fairway: [{ type: 'rect', x: 5, y: 5, width: 90, height: 90 }], obstacles: [
                 { x: 20, y: 20, width: 60, height: 60, type: 'sand' },
                 { x: 50, y: 50, width: 10, height: 15, type: 'wall', customClass: 'obstacle-tree' }
             ]
         },
-        // Hole 13: The Gauntlet
+        // Hole 13: The Gauntlet - using old format for now
         {
-            start: { x: 5, y: 50 }, hole: { x: 95, y: 50 }, par: 5, obstacles: [
+            start: { x: 5, y: 50 }, hole: { x: 95, y: 50 }, par: 5, fairway: [{ type: 'rect', x: 2, y: 40, width: 96, height: 20 }], obstacles: [
                 { x: 20, y: 45, width: 5, height: 10, type: 'wall' },
                 { x: 40, y: 45, width: 5, height: 10, type: 'wall' },
                 { x: 60, y: 45, width: 5, height: 10, type: 'wall' },
                 { x: 80, y: 45, width: 5, height: 10, type: 'wall' }
             ]
         },
-        // Hole 14: The Bridge
+        // Hole 14: The Bridge - using old format for now
         {
-            start: { x: 10, y: 50 }, hole: { x: 90, y: 50 }, par: 4, obstacles: [
+            start: { x: 10, y: 50 }, hole: { x: 90, y: 50 }, par: 4, fairway: [{ type: 'rect', x: 5, y: 48, width: 90, height: 4 }], obstacles: [
                 { x: 30, y: 0, width: 40, height: 45, type: 'water' },
                 { x: 30, y: 55, width: 40, height: 45, type: 'water' }
             ]
         },
-        // Hole 15: The L
+        // Hole 15: The L - using old format for now
         {
-            start: { x: 10, y: 10 }, hole: { x: 90, y: 90 }, par: 4, obstacles: [
+            start: { x: 10, y: 10 }, hole: { x: 90, y: 90 }, par: 4, fairway: [{ type: 'rect', x: 5, y: 5, width: 90, height: 90 }], obstacles: [
                 { x: 10, y: 50, width: 80, height: 5, type: 'wall' },
                 { x: 85, y: 10, width: 5, height: 45, type: 'wall' }
             ]
         },
-        // Hole 16: The U
+        // Hole 16: The U - using old format for now
         {
-            start: { x: 10, y: 10 }, hole: { x: 90, y: 10 }, par: 5, obstacles: [
+            start: { x: 10, y: 10 }, hole: { x: 90, y: 10 }, par: 5, fairway: [{ type: 'rect', x: 5, y: 5, width: 90, height: 90 }], obstacles: [
                 { x: 10, y: 20, width: 5, height: 70, type: 'wall' },
                 { x: 10, y: 90, width: 80, height: 5, type: 'wall' },
                 { x: 85, y: 20, width: 5, height: 70, type: 'wall' }
             ]
         },
-        // Hole 17: Triple Threat
+        // Hole 17: Triple Threat - using old format for now
         {
-            start: { x: 10, y: 50 }, hole: { x: 90, y: 50 }, par: 5, obstacles: [
+            start: { x: 10, y: 50 }, hole: { x: 90, y: 50 }, par: 5, fairway: [{ type: 'rect', x: 5, y: 40, width: 90, height: 20 }], obstacles: [
                 { x: 30, y: 45, width: 10, height: 10, type: 'water' },
                 { x: 50, y: 45, width: 10, height: 10, type: 'sand' },
                 { x: 70, y: 45, width: 10, height: 10, type: 'wall' }
             ]
         },
-        // Hole 18: The Long Putt
-        { start: { x: 5, y: 50 }, hole: { x: 95, y: 50 }, par: 3, obstacles: [] },
-        // Hole 19: The Spiral
+        // Hole 18: The Long Putt - using old format for now
+        { start: { x: 5, y: 50 }, hole: { x: 95, y: 50 }, par: 3, fairway: [{ type: 'rect', x: 2, y: 40, width: 96, height: 20 }], obstacles: [] },
+        // Hole 19: The Spiral - using old format for now
         {
-            start: { x: 50, y: 50 }, hole: { x: 50, y: 50 }, par: 6, obstacles: [
+            start: { x: 50, y: 50 }, hole: { x: 50, y: 50 }, par: 6, fairway: [{ type: 'rect', x: 25, y: 25, width: 50, height: 50 }], obstacles: [
                 { x: 30, y: 30, width: 40, height: 5, type: 'wall' },
                 { x: 30, y: 30, width: 5, height: 40, type: 'wall' },
                 { x: 30, y: 70, width: 45, height: 5, type: 'wall' },
                 { x: 70, y: 30, width: 5, height: 45, type: 'wall' }
             ]
         },
-        // Hole 20: The Final Challenge
+        // Hole 20: The Final Challenge - using old format for now
         {
-            start: { x: 10, y: 10 }, hole: { x: 90, y: 90 }, par: 7, obstacles: [
+            start: { x: 10, y: 10 }, hole: { x: 90, y: 90 }, par: 7, fairway: [{ type: 'rect', x: 5, y: 5, width: 90, height: 90 }], obstacles: [
                 { x: 0, y: 48, width: 30, height: 4, type: 'water' },
                 { x: 70, y: 48, width: 30, height: 4, type: 'water' },
                 { x: 48, y: 0, width: 4, height: 30, type: 'sand' },
@@ -238,6 +258,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let aimStartPos = { x: 0, y: 0 };
     let animationFrameId = null;
     let currentObstacles = [];
+    let fairwayParts = [];
+    let currentFairwayShapes = [];
 
     // --- Utility Functions ---
     function getElementCenter(element) {
@@ -296,9 +318,52 @@ document.addEventListener('DOMContentLoaded', () => {
         updateElementPosition(holeElement, currentHolePos);
         holeCoordsDisplay.textContent = `Hole: (${currentHolePos.x.toFixed(2)}, ${currentHolePos.y.toFixed(2)})`;
 
-        // Clean up old obstacles
+        // Clean up old elements
+        fairwayParts.forEach(part => part.remove());
+        fairwayParts = [];
+        currentFairwayShapes = [];
         currentObstacles.forEach(obs => obs.remove());
         currentObstacles = [];
+
+        // Create Fairway
+        if (data.fairway && Array.isArray(data.fairway)) {
+            data.fairway.forEach(shapeData => {
+                const part = document.createElement('div');
+                part.classList.add('fairway');
+
+                switch (shapeData.type) {
+                    case 'rect':
+                        const fwX = shapeData.x / 100 * courseRect.width;
+                        const fwY = shapeData.y / 100 * courseRect.height;
+                        const fwWidth = shapeData.width / 100 * courseRect.width;
+                        const fwHeight = shapeData.height / 100 * courseRect.height;
+                        part.style.left = `${fwX}px`;
+                        part.style.top = `${fwY}px`;
+                        part.style.width = `${fwWidth}px`;
+                        part.style.height = `${fwHeight}px`;
+                        currentFairwayShapes.push({ type: 'rect', left: fwX, top: fwY, right: fwX + fwWidth, bottom: fwY + fwHeight });
+                        break;
+                    case 'circle':
+                        const cx = shapeData.cx / 100 * courseRect.width;
+                        const cy = shapeData.cy / 100 * courseRect.height;
+                        const radius = shapeData.radius / 100 * Math.min(courseRect.width, courseRect.height); // radius based on smaller dimension
+                        part.style.left = `${cx - radius}px`;
+                        part.style.top = `${cy - radius}px`;
+                        part.style.width = `${radius * 2}px`;
+                        part.style.height = `${radius * 2}px`;
+                        part.style.borderRadius = '50%';
+                        currentFairwayShapes.push({ type: 'circle', cx: cx, cy: cy, radius: radius });
+                        break;
+                }
+                courseElement.appendChild(part);
+                fairwayParts.push(part);
+            });
+        }
+        // Fallback for old format or no fairway defined
+        if (currentFairwayShapes.length === 0) {
+            currentFairwayShapes.push({ type: 'rect', left: 0, top: 0, right: courseRect.width, bottom: courseRect.height });
+        }
+
 
         // Add new obstacles
         if (data.obstacles) {
@@ -357,7 +422,24 @@ document.addEventListener('DOMContentLoaded', () => {
         showMessage(message, 'success');
     }
 
-    function isBallInSand(currentBallPos) {
+    function isBallInFairway(ballPos) {
+        for (const shape of currentFairwayShapes) {
+            if (shape.type === 'rect') {
+                if (ballPos.x > shape.left && ballPos.x < shape.right &&
+                    ballPos.y > shape.top && ballPos.y < shape.bottom) {
+                    return true;
+                }
+            } else if (shape.type === 'circle') {
+                if (distance(ballPos, { x: shape.cx, y: shape.cy }) < shape.radius) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    function getBallTerrain(currentBallPos) {
+        // Check for sand first, as it can be on the fairway
         for (const obs of currentObstacles) {
             if (obs.dataset.obsType === 'sand') {
                 const rect = {
@@ -368,11 +450,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
                 if (currentBallPos.x > rect.left && currentBallPos.x < rect.right &&
                     currentBallPos.y > rect.top && currentBallPos.y < rect.bottom) {
-                    return true;
+                    return 'sand';
                 }
             }
         }
-        return false;
+
+        if (isBallInFairway(currentBallPos)) {
+            return 'fairway';
+        }
+
+        return 'rough';
     }
 
     function update() {
@@ -401,7 +488,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Friction
         if (ballPos.z === 0) {
-            const currentFriction = isBallInSand(ballPos) ? SAND_FRICTION : NORMAL_FRICTION;
+            const terrain = getBallTerrain(ballPos);
+            let currentFriction = NORMAL_FRICTION;
+            if (terrain === 'sand') {
+                currentFriction = SAND_FRICTION;
+            } else if (terrain === 'rough') {
+                currentFriction = ROUGH_FRICTION;
+            }
             ballVel.x *= currentFriction;
             ballVel.y *= currentFriction;
         }
@@ -486,15 +579,28 @@ document.addEventListener('DOMContentLoaded', () => {
         ballPos.x += ballVel.x;
         ballPos.y += ballVel.y;
 
-        // Boundary Collision
+        // Boundary Collision (Out of Bounds)
         const courseRect = courseElement.getBoundingClientRect();
-        if (ballPos.x - BALL_RADIUS < 0 || ballPos.x + BALL_RADIUS > courseRect.width) {
-            ballPos.x = Math.max(BALL_RADIUS, Math.min(courseRect.width - BALL_RADIUS, ballPos.x));
-            ballVel.x *= -0.8;
-        }
-        if (ballPos.y - BALL_RADIUS < 0 || ballPos.y + BALL_RADIUS > courseRect.height) {
-            ballPos.y = Math.max(BALL_RADIUS, Math.min(courseRect.height - BALL_RADIUS, ballPos.y));
-            ballVel.y *= -0.8;
+        if (ballPos.x - BALL_RADIUS < 0 || ballPos.x + BALL_RADIUS > courseRect.width ||
+            ballPos.y - BALL_RADIUS < 0 || ballPos.y + BALL_RADIUS > courseRect.height) {
+
+            showMessage(`Out of Bounds! ${OUT_OF_BOUNDS_PENALTY} stroke penalty.`, 'penalty');
+            strokes += OUT_OF_BOUNDS_PENALTY;
+            totalStrokes += OUT_OF_BOUNDS_PENALTY;
+            strokeCountElement.textContent = strokes;
+            totalStrokesElement.textContent = totalStrokes;
+
+            // Reset ball position
+            ballPos = {
+                x: holeData[currentHoleIndex].start.x / 100 * courseRect.width,
+                y: holeData[currentHoleIndex].start.y / 100 * courseRect.height,
+                z: 0
+            };
+            ballVel = { x: 0, y: 0, z: 0 };
+            isMoving = false;
+            updateElementPosition(ballElement, ballPos);
+            setTimeout(() => showMessage(`Ready for stroke ${strokes + 1}.`), 1500);
+            return; // Stop the update loop for this frame
         }
 
         // Update visual position
