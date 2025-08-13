@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const messageAreaElement = document.getElementById('message-area');
     const totalParElement = document.getElementById('total-par');
     const totalStrokesElement = document.getElementById('total-strokes');
-    const fairwayGroup = document.getElementById('fairway-group');
     const aimLineElement = document.getElementById('aim-line');
     const putterBtn = document.getElementById('putter-btn');
     const wedgeBtn = document.getElementById('wedge-btn');
@@ -125,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let aimStartPos = { x: 0, y: 0 };
     let animationFrameId = null;
     let currentObstacles = [];
-    let currentFairwayShapes = [];
+    let allPhysicsShapes = [];
     let currentHoleIndex;
 
     // --- Utility Functions ---
@@ -186,32 +185,27 @@ document.addEventListener('DOMContentLoaded', () => {
         holeCoordsDisplay.textContent = `Hole: (${currentHolePos.x.toFixed(2)}, ${currentHolePos.y.toFixed(2)})`;
 
         // Clean up old elements
-        fairwayGroup.innerHTML = '';
-        currentFairwayShapes = [];
+        allPhysicsShapes = [];
         currentObstacles.forEach(obs => obs.remove());
         currentObstacles = [];
 
-        // Create Fairway
-        if (data.fairway) {
-            // Create visual path
-            if (data.fairway.path) {
-                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                path.setAttribute('d', data.fairway.path);
-                path.classList.add('fairway-path');
-                fairwayGroup.appendChild(path);
-            }
+        // Add new obstacles and build physics shapes array
+        if (data.obstacles) {
+            data.obstacles.forEach(obsData => {
+                // For regular obstacles, the visual shape is the physics shape
+                // For fairway, it has a separate, more detailed physics shape definition
+                const physicsShapeData = obsData.physicsShapes || [obsData.shape];
 
-            // Create physics shapes
-            if (data.fairway.physicsShapes && Array.isArray(data.fairway.physicsShapes)) {
-                data.fairway.physicsShapes.forEach(shapeData => {
+                physicsShapeData.forEach(shapeData => {
                     let shape;
+                    const courseRect = courseElement.getBoundingClientRect();
                     switch (shapeData.type) {
                         case 'rect':
-                            const fwX = shapeData.x / 100 * courseRect.width;
-                            const fwY = shapeData.y / 100 * courseRect.height;
-                            const fwWidth = shapeData.width / 100 * courseRect.width;
-                            const fwHeight = shapeData.height / 100 * courseRect.height;
-                            shape = { type: 'rect', left: fwX, top: fwY, right: fwX + fwWidth, bottom: fwY + fwHeight };
+                            const x = (shapeData.x || 0) / 100 * courseRect.width;
+                            const y = (shapeData.y || 0) / 100 * courseRect.height;
+                            const width = (shapeData.width || 0) / 100 * courseRect.width;
+                            const height = (shapeData.height || 0) / 100 * courseRect.height;
+                            shape = { type: 'rect', left: x, top: y, right: x + width, bottom: y + height };
                             break;
                         case 'circle':
                             const cx = shapeData.cx / 100 * courseRect.width;
@@ -226,20 +220,20 @@ document.addEventListener('DOMContentLoaded', () => {
                             }));
                             shape = { type: 'polygon', points: points };
                             break;
+                        case 'oval':
+                             const ovCx = shapeData.cx / 100 * courseRect.width;
+                             const ovCy = shapeData.cy / 100 * courseRect.height;
+                             const rx = shapeData.rx / 100 * courseRect.width;
+                             const ry = shapeData.ry / 100 * courseRect.height;
+                             shape = { type: 'oval', cx: ovCx, cy: ovCy, rx: rx, ry: ry };
+                             break;
                     }
-                    if (shape) currentFairwayShapes.push(shape);
+                    if (shape) {
+                        shape.terrainType = obsData.type; // Tag shape with its terrain type
+                        allPhysicsShapes.push(shape);
+                    }
                 });
-            }
-        }
 
-        if (currentFairwayShapes.length === 0) {
-            currentFairwayShapes.push({ type: 'rect', left: 0, top: 0, right: courseRect.width, bottom: courseRect.height });
-        }
-
-
-        // Add new obstacles
-        if (data.obstacles) {
-            data.obstacles.forEach(obsData => {
                 const obsElement = document.createElement('div');
                 obsElement.classList.add('obstacle', `obstacle-${obsData.type}`);
 
@@ -306,11 +300,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
-                // Store pixel values in dataset for collision detection
-                obsElement.dataset.obsType = obsData.type;
-                obsElement.dataset.shape = JSON.stringify(shape);
-
-
                 courseElement.appendChild(obsElement);
                 currentObstacles.push(obsElement);
             });
@@ -325,7 +314,6 @@ document.addEventListener('DOMContentLoaded', () => {
         totalStrokesElement.textContent = totalStrokes;
 
         showMessage(`Hole ${holeIndex + 1} (Par ${data.par}). Aim and shoot!`);
-        aimLineElement.parentElement.style.visibility = 'hidden';
     }
 
     function gameOver() {
@@ -354,121 +342,47 @@ document.addEventListener('DOMContentLoaded', () => {
         return isInside;
     }
 
-    function isBallInFairway(ballPos) {
-        for (const shape of currentFairwayShapes) {
-            if (shape.type === 'rect') {
-                if (ballPos.x > shape.left && ballPos.x < shape.right &&
-                    ballPos.y > shape.top && ballPos.y < shape.bottom) {
-                    return true;
-                }
-            } else if (shape.type === 'circle') {
-                if (distance(ballPos, { x: shape.cx, y: shape.cy }) < shape.radius) {
-                    return true;
-                }
-            } else if (shape.type === 'polygon') {
-                if (isPointInPolygon(ballPos, shape.points)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    function getBallTerrain(currentBallPos) {
-        const courseRect = courseElement.getBoundingClientRect();
-        for (const obs of currentObstacles) {
-            const shape = JSON.parse(obs.dataset.shape);
-            if (obs.dataset.obsType === 'sand') {
-                if (shape.type === 'rect') {
-                    const rect = {
-                        left: shape.x / 100 * courseRect.width,
-                        top: shape.y / 100 * courseRect.height,
-                        right: (shape.x + shape.width) / 100 * courseRect.width,
-                        bottom: (shape.y + shape.height) / 100 * courseRect.height
-                    };
-                    if (currentBallPos.x > rect.left && currentBallPos.x < rect.right &&
-                        currentBallPos.y > rect.top && currentBallPos.y < rect.bottom) {
-                        return 'sand';
-                    }
-                } else if (shape.type === 'circle') {
-                    const cx = shape.cx / 100 * courseRect.width;
-                    const cy = shape.cy / 100 * courseRect.height;
-                    const radius = shape.radius / 100 * Math.min(courseRect.width, courseRect.height);
-                    if (distance(currentBallPos, { x: cx, y: cy }) < radius) {
-                        return 'sand';
-                    }
-                } else if (shape.type === 'oval') {
-                    const cx = shape.cx / 100 * courseRect.width;
-                    const cy = shape.cy / 100 * courseRect.height;
-                    const rx = shape.rx / 100 * courseRect.width;
-                    const ry = shape.ry / 100 * courseRect.height;
-                    if (Math.pow(currentBallPos.x - cx, 2) / Math.pow(rx, 2) + Math.pow(currentBallPos.y - cy, 2) / Math.pow(ry, 2) < 1) {
-                        return 'sand';
-                    }
-                }
-            }
-        }
-
-        if (isBallInFairway(currentBallPos)) {
-            return 'fairway';
-        }
-
-        return 'rough';
-    }
-
     function getTerrainAtPoint(point) {
         const terrains = [];
-        const courseRect = courseElement.getBoundingClientRect();
-
-        // Check obstacles first
-        for (const obs of currentObstacles) {
-            const shape = JSON.parse(obs.dataset.shape);
-            const obsType = obs.dataset.obsType;
-            let isInObstacle = false;
-
+        for (const shape of allPhysicsShapes) {
+            let isInside = false;
             if (shape.type === 'rect') {
-                const rect = {
-                    left: shape.x / 100 * courseRect.width,
-                    top: shape.y / 100 * courseRect.height,
-                    right: (shape.x + shape.width) / 100 * courseRect.width,
-                    bottom: (shape.y + shape.height) / 100 * courseRect.height
-                };
-                if (point.x > rect.left && point.x < rect.right && point.y > rect.top && point.y < rect.bottom) {
-                    isInObstacle = true;
+                if (point.x > shape.left && point.x < shape.right && point.y > shape.top && point.y < shape.bottom) {
+                    isInside = true;
                 }
             } else if (shape.type === 'circle') {
-                const cx = shape.cx / 100 * courseRect.width;
-                const cy = shape.cy / 100 * courseRect.height;
-                const radius = shape.radius / 100 * Math.min(courseRect.width, courseRect.height);
-                if (distance(point, { x: cx, y: cy }) < radius) {
-                    isInObstacle = true;
+                if (distance(point, { x: shape.cx, y: shape.cy }) < shape.radius) {
+                    isInside = true;
+                }
+            } else if (shape.type === 'polygon') {
+                if (isPointInPolygon(point, shape.points)) {
+                    isInside = true;
                 }
             } else if (shape.type === 'oval') {
-                const cx = shape.cx / 100 * courseRect.width;
-                const cy = shape.cy / 100 * courseRect.height;
-                const rx = shape.rx / 100 * courseRect.width;
-                const ry = shape.ry / 100 * courseRect.height;
-                if (Math.pow(point.x - cx, 2) / Math.pow(rx, 2) + Math.pow(point.y - cy, 2) / Math.pow(ry, 2) < 1) {
-                    isInObstacle = true;
+                if (Math.pow(point.x - shape.cx, 2) / Math.pow(shape.rx, 2) + Math.pow(point.y - shape.cy, 2) / Math.pow(shape.ry, 2) < 1) {
+                    isInside = true;
                 }
             }
 
-            if (isInObstacle) {
-                terrains.push(obsType);
+            if (isInside) {
+                terrains.push(shape.terrainType);
             }
         }
 
-        // Check fairway
-        if (isBallInFairway(point)) {
-            terrains.push('fairway');
-        }
-
-        // If no other terrain, it's rough
         if (terrains.length === 0) {
             terrains.push('rough');
         }
-
         return terrains;
+    }
+
+    function getBallTerrain(currentBallPos) {
+        const terrains = getTerrainAtPoint(currentBallPos);
+
+        if (terrains.includes('sand')) return 'sand';
+        if (terrains.includes('water')) return 'rough'; // Water has rough-like friction
+        if (terrains.includes('fairway')) return 'fairway';
+
+        return 'rough';
     }
 
     function update() {
