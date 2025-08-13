@@ -37,8 +37,7 @@ h1 {
     height: 57.85vw; /* Maintain 700/450 aspect ratio */
     max-width: 700px;
     max-height: 450px;
-    background-image: url('rough_texture.svg');
-    background-color: #2a8a2a; /* Fallback color */
+    background-color: #000; /* Black for rough */
     position: relative;
     overflow: hidden;
     cursor: crosshair;
@@ -49,7 +48,7 @@ h1 {
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 9999; /* Debug: very high z-index */
+    z-index: 2; /* Above the rough, below obstacles */
     pointer-events: none; /* Allow clicks to pass through to the course */
 }
 

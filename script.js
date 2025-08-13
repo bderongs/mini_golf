@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const holeCoordsDisplay = document.getElementById('hole-coords-display');
     const mouseCoordsDisplay = document.getElementById('mouse-coords-display');
     const liveHoleCoordsDisplay = document.getElementById('live-hole-coords-display');
+    const terrainDebugDisplay = document.getElementById('terrain-debug-display');
 
     // Display version
     versionDisplayElement.textContent = `Version: ${new Date().toISOString()}`;
@@ -415,6 +416,61 @@ document.addEventListener('DOMContentLoaded', () => {
         return 'rough';
     }
 
+    function getTerrainAtPoint(point) {
+        const terrains = [];
+        const courseRect = courseElement.getBoundingClientRect();
+
+        // Check obstacles first
+        for (const obs of currentObstacles) {
+            const shape = JSON.parse(obs.dataset.shape);
+            const obsType = obs.dataset.obsType;
+            let isInObstacle = false;
+
+            if (shape.type === 'rect') {
+                const rect = {
+                    left: shape.x / 100 * courseRect.width,
+                    top: shape.y / 100 * courseRect.height,
+                    right: (shape.x + shape.width) / 100 * courseRect.width,
+                    bottom: (shape.y + shape.height) / 100 * courseRect.height
+                };
+                if (point.x > rect.left && point.x < rect.right && point.y > rect.top && point.y < rect.bottom) {
+                    isInObstacle = true;
+                }
+            } else if (shape.type === 'circle') {
+                const cx = shape.cx / 100 * courseRect.width;
+                const cy = shape.cy / 100 * courseRect.height;
+                const radius = shape.radius / 100 * Math.min(courseRect.width, courseRect.height);
+                if (distance(point, { x: cx, y: cy }) < radius) {
+                    isInObstacle = true;
+                }
+            } else if (shape.type === 'oval') {
+                const cx = shape.cx / 100 * courseRect.width;
+                const cy = shape.cy / 100 * courseRect.height;
+                const rx = shape.rx / 100 * courseRect.width;
+                const ry = shape.ry / 100 * courseRect.height;
+                if (Math.pow(point.x - cx, 2) / Math.pow(rx, 2) + Math.pow(point.y - cy, 2) / Math.pow(ry, 2) < 1) {
+                    isInObstacle = true;
+                }
+            }
+
+            if (isInObstacle) {
+                terrains.push(obsType);
+            }
+        }
+
+        // Check fairway
+        if (isBallInFairway(point)) {
+            terrains.push('fairway');
+        }
+
+        // If no other terrain, it's rough
+        if (terrains.length === 0) {
+            terrains.push('rough');
+        }
+
+        return terrains;
+    }
+
     function update() {
         if (!isMoving) return;
 
@@ -702,6 +758,14 @@ document.addEventListener('DOMContentLoaded', () => {
             showMessage(`Ready for stroke ${strokes + 1}.`);
         }
     };
+
+    courseElement.addEventListener('mousemove', (e) => {
+        const rect = courseElement.getBoundingClientRect();
+        const mousePos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+
+        const terrains = getTerrainAtPoint(mousePos);
+        terrainDebugDisplay.textContent = `Mouse over terrain: ${terrains.join(', ')}`;
+    });
 
     // Mouse Events
     courseElement.addEventListener('mousedown', (e) => { e.preventDefault(); handleAimStart(e.clientX, e.clientY); });
