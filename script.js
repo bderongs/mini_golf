@@ -140,25 +140,29 @@ document.addEventListener('DOMContentLoaded', () => {
         renderableObstacles = [];
         allPhysicsShapes = [];
         currentCourse.obstacles.forEach(obs => {
-            const visualShape = { ...obs.shape, terrainType: obs.type };
-            if (visualShape.type === 'rect') {
-                visualShape.x = obs.shape.x / 100 * canvas.width;
-                visualShape.y = obs.shape.y / 100 * canvas.height;
-                visualShape.width = obs.shape.width / 100 * canvas.width;
-                visualShape.height = obs.shape.height / 100 * canvas.height;
-            } else if (visualShape.type === 'circle') {
-                visualShape.cx = obs.shape.cx / 100 * canvas.width;
-                visualShape.cy = obs.shape.cy / 100 * canvas.height;
-                visualShape.radius = obs.shape.radius / 100 * Math.min(canvas.width, canvas.height);
-            } else if (visualShape.type === 'oval') {
-                visualShape.cx = obs.shape.cx / 100 * canvas.width;
-                visualShape.cy = obs.shape.cy / 100 * canvas.height;
-                visualShape.rx = obs.shape.rx / 100 * canvas.width;
-                visualShape.ry = obs.shape.ry / 100 * canvas.height;
-            }
-            renderableObstacles.push(visualShape);
+            const shapes = Array.isArray(obs.shape) ? obs.shape : [obs.shape];
 
-            const physicsShapeData = obs.physicsShapes || [obs.shape];
+            shapes.forEach(shape => {
+                const visualShape = { ...shape, terrainType: obs.type };
+                if (visualShape.type === 'rect') {
+                    visualShape.x = shape.x / 100 * canvas.width;
+                    visualShape.y = shape.y / 100 * canvas.height;
+                    visualShape.width = shape.width / 100 * canvas.width;
+                    visualShape.height = shape.height / 100 * canvas.height;
+                } else if (visualShape.type === 'circle') {
+                    visualShape.cx = shape.cx / 100 * canvas.width;
+                    visualShape.cy = shape.cy / 100 * canvas.height;
+                    visualShape.radius = shape.radius / 100 * Math.min(canvas.width, canvas.height);
+                } else if (visualShape.type === 'oval') {
+                    visualShape.cx = shape.cx / 100 * canvas.width;
+                    visualShape.cy = shape.cy / 100 * canvas.height;
+                    visualShape.rx = shape.rx / 100 * canvas.width;
+                    visualShape.ry = shape.ry / 100 * canvas.height;
+                }
+                renderableObstacles.push(visualShape);
+            });
+
+            const physicsShapeData = obs.physicsShapes || shapes;
             physicsShapeData.forEach(ps => {
                 const newShape = { ...ps, terrainType: obs.type };
                  if (newShape.type === 'rect') {
