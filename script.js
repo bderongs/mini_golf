@@ -437,6 +437,20 @@ document.addEventListener('DOMContentLoaded', () => {
     canvas.addEventListener('mouseup', handleAimEnd);
     canvas.addEventListener('mouseout', () => { if (isAiming) handleAimEnd({clientX: aimEndPos.x, clientY: aimEndPos.y}); });
 
+    function selectClub(club) {
+        selectedClub = club;
+        if (club === 'putter') {
+            putterBtn.classList.add('active');
+            wedgeBtn.classList.remove('active');
+        } else if (club === 'wedge') {
+            wedgeBtn.classList.add('active');
+            putterBtn.classList.remove('active');
+        }
+    }
+
+    putterBtn.addEventListener('click', () => selectClub('putter'));
+    wedgeBtn.addEventListener('click', () => selectClub('wedge'));
+
     async function initializeGame() {
         await loadAllCourses();
         showLevelSelection();
