@@ -301,6 +301,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (shape.type === 'oval') return (Math.pow(point.x - shape.cx, 2) / Math.pow(shape.rx, 2) + Math.pow(point.y - shape.cy, 2) / Math.pow(shape.ry, 2) < 1);
         return false;
     }
+    function showMessage(msg, type = 'info') {
+        messageAreaElement.textContent = msg;
+        messageAreaElement.className = 'message-area'; // Reset classes
+        if (type === 'success') {
+            messageAreaElement.classList.add('success');
+        } else if (type === 'penalty') {
+            messageAreaElement.classList.add('penalty');
+        }
+    }
     function getTerrainAtPoint(point) {
         const terrains = [];
         for (const shape of allPhysicsShapes) {
