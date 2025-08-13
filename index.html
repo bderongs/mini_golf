@@ -37,15 +37,7 @@
                 <div id="hole">
                     <div class="flag"></div>
                 </div>
-                <svg id="course-svg" width="100%" height="100%">
-                    <defs>
-                        <!-- The grass texture will be referenced as a pattern -->
-                        <pattern id="grass-pattern" patternUnits="userSpaceOnUse" width="50" height="50">
-                            <image href="grass_texture.svg" x="0" y="0" width="50" height="50" />
-                        </pattern>
-                    </defs>
-                    <!-- Group for all fairway paths -->
-                    <g id="fairway-group"></g>
+                <svg width="100%" height="100%" style="position: absolute; top: 0; left: 0; pointer-events: none;">
                     <!-- The new aim line -->
                     <line id="aim-line" x1="0" y1="0" x2="0" y2="0" stroke="rgba(255, 255, 255, 0.8)" stroke-width="2"
                         stroke-dasharray="5,5" style="visibility: hidden;" />

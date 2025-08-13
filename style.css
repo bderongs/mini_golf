@@ -44,20 +44,6 @@ h1 {
     border-radius: 3px;
 }
 
-#course-svg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 2; /* Above the rough, below obstacles */
-    pointer-events: none; /* Allow clicks to pass through to the course */
-}
-
-.fairway-path {
-    fill: #4caf50; /* A nice, lighter green for the fairway */
-    stroke: #2e8b57; /* A slightly darker green for the edge */
-    stroke-width: 2;
-}
-
 #ball-shadow {
     width: 2.8vmin;
     height: 2.8vmin;
@@ -146,6 +132,12 @@ h1 {
     background-size: contain;
     width: 30px; /* Example size, can be randomized */
     height: 30px; /* Example size, can be randomized */
+}
+
+/* Style Fairway */
+.obstacle-fairway {
+    background-color: #4caf50; /* A nice, lighter green for the fairway */
+    z-index: 1; /* Below other obstacles */
 }
 
 /* Style Eau */
