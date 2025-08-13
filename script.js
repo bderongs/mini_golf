@@ -348,17 +348,32 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (shape.type === 'oval') drawOval(shape, ctx);
         });
 
-        ctx.fillStyle = '#FFFFFF';
-        ctx.beginPath();
-        ctx.arc(ballPos.x, ballPos.y, BALL_RADIUS, 0, Math.PI * 2);
-        ctx.fill();
-
+        // Draw hole
         ctx.fillStyle = '#111111';
         ctx.beginPath();
         ctx.arc(holePos.x, holePos.y, HOLE_RADIUS, 0, Math.PI * 2);
         ctx.fill();
 
+        // Draw shadow if ball is in the air
+        if (ballPos.z > 0) {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.beginPath();
+            // Shadow gets smaller as the ball gets higher
+            const shadowRadius = BALL_RADIUS * Math.max(0.4, 1 - ballPos.z / 100);
+            ctx.arc(ballPos.x, ballPos.y, shadowRadius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Draw ball
+        const visualBallRadius = BALL_RADIUS * (1 + ballPos.z / 200);
+        const visualBallY = ballPos.y - ballPos.z;
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.arc(ballPos.x, visualBallY, visualBallRadius, 0, Math.PI * 2);
+        ctx.fill();
+
         if (isAiming) {
+            // The aiming line should start from the ball's logical position on the ground
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
             ctx.lineWidth = 2;
             ctx.setLineDash([5, 5]);
