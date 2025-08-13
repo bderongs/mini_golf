@@ -268,18 +268,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (nextX - BALL_RADIUS < 0 || nextX + BALL_RADIUS > canvas.width) ballVel.x *= -1;
         if (nextY - BALL_RADIUS < 0 || nextY + BALL_RADIUS > canvas.height) ballVel.y *= -1;
 
-        for (const shape of allPhysicsShapes) {
-            if (shape.terrainType === 'water' && isPointInShape({x: nextX, y: nextY}, shape)) {
-                showMessage(`Splash! ${WATER_PENALTY} stroke penalty.`, 'penalty');
-                strokes += WATER_PENALTY;
-                totalStrokes += WATER_PENALTY;
-                setupHole(currentHoleIndex);
-                return;
-            }
-            if (shape.terrainType === 'tree-patch' && isPointInShape({x: nextX, y: nextY}, shape)) {
-                 ballVel.x *= -1;
-                 ballVel.y *= -1;
-                 break;
+        // Hazard collision only applies if the ball is on the ground
+        if (ballPos.z === 0) {
+            for (const shape of allPhysicsShapes) {
+                if (shape.terrainType === 'water' && isPointInShape({x: nextX, y: nextY}, shape)) {
+                    showMessage(`Splash! ${WATER_PENALTY} stroke penalty.`, 'penalty');
+                    strokes += WATER_PENALTY;
+                    totalStrokes += WATER_PENALTY;
+                    setupHole(currentHoleIndex);
+                    return;
+                }
+                if (shape.terrainType === 'tree-patch' && isPointInShape({x: nextX, y: nextY}, shape)) {
+                     ballVel.x *= -1;
+                     ballVel.y *= -1;
+                     break;
+                }
             }
         }
 
