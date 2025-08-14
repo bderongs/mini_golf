@@ -306,8 +306,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (nextX - BALL_RADIUS < 0 || nextX + BALL_RADIUS > canvas.width) ballVel.x *= -1;
-        if (nextY - BALL_RADIUS < 0 || nextY + BALL_RADIUS > canvas.height) ballVel.y *= -1;
+        if (nextX - BALL_RADIUS < 0 || nextX + BALL_RADIUS > canvas.width || nextY - BALL_RADIUS < 0 || nextY + BALL_RADIUS > canvas.height) {
+            showMessage(`Out of bounds! ${OUT_OF_BOUNDS_PENALTY} stroke penalty.`, 'penalty');
+            strokes += OUT_OF_BOUNDS_PENALTY;
+            totalStrokes += OUT_OF_BOUNDS_PENALTY;
+            setupHole(currentHoleIndex);
+            return;
+        }
 
         // Hazard collision only applies if the ball is on the ground
         if (ballPos.z === 0) {
@@ -391,6 +396,13 @@ function drawPolygon(shape, ctx) {
     ctx.fill();
 }
 
+function drawShape(shape, ctx) {
+    if (shape.type === 'rect') drawRect(shape, ctx);
+    else if (shape.type === 'circle') drawCircle(shape, ctx);
+    else if (shape.type === 'oval') drawOval(shape, ctx);
+    else if (shape.type === 'polygon') drawPolygon(shape, ctx);
+}
+
     function render() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = terrainPatterns.rough || terrainColors.rough;
@@ -403,11 +415,23 @@ function drawPolygon(shape, ctx) {
         });
 
         renderableObstacles.forEach(shape => {
-            ctx.fillStyle = terrainPatterns[shape.terrainType] || terrainColors[shape.terrainType] || '#CCCCCC';
-            if (shape.type === 'rect') drawRect(shape, ctx);
-            else if (shape.type === 'circle') drawCircle(shape, ctx);
-            else if (shape.type === 'oval') drawOval(shape, ctx);
-            else if (shape.type === 'polygon') drawPolygon(shape, ctx);
+            if (shape.terrainType === 'water') {
+                // Draw the rough texture first
+                ctx.fillStyle = terrainPatterns.rough || terrainColors.rough;
+                drawShape(shape, ctx);
+
+                // Then, draw a semi-transparent blue color over it
+                ctx.globalAlpha = 0.5;
+                ctx.fillStyle = terrainColors.water || '#1E90FF';
+                drawShape(shape, ctx);
+
+                // Reset alpha
+                ctx.globalAlpha = 1.0;
+            } else {
+                // Original logic for all other terrains
+                ctx.fillStyle = terrainPatterns[shape.terrainType] || terrainColors[shape.terrainType] || '#CCCCCC';
+                drawShape(shape, ctx);
+            }
         });
 
         // Draw hole
