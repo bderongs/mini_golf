@@ -72,6 +72,15 @@ document.addEventListener('DOMContentLoaded', () => {
         'fairway': 4,
     };
 
+    const terrainPatterns = {};
+    const textureSources = {
+        fairway: 'grass_texture.svg',
+        green: 'grass_texture.svg',
+        sand: 'sand_texture.svg',
+        water: 'water_texture.svg',
+        rough: 'rough_texture.svg'
+    };
+
     // --- Screen Management ---
     function showLevelSelection() {
         levelSelectionScreen.style.display = 'block';
@@ -121,6 +130,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const coursePromises = Array.from({ length: NUM_LEVELS }, (_, i) => loadCourseData(i));
         const results = await Promise.all(coursePromises);
         holeData = results.filter(data => data !== null);
+    }
+
+    async function loadTextures() {
+        const promises = Object.entries(textureSources).map(([terrain, src]) => {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => {
+                    const pattern = ctx.createPattern(img, 'repeat');
+                    terrainPatterns[terrain] = pattern;
+                    resolve();
+                };
+                img.onerror = () => reject(new Error(`Failed to load texture: ${src}`));
+                img.src = src;
+            });
+        });
+        await Promise.all(promises);
+        console.log("All textures loaded and patterns created.");
     }
 
     // --- Game Logic ---
@@ -367,7 +393,7 @@ function drawPolygon(shape, ctx) {
 
     function render() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = terrainColors.rough;
+        ctx.fillStyle = terrainPatterns.rough || terrainColors.rough;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         renderableObstacles.sort((a, b) => {
@@ -377,7 +403,7 @@ function drawPolygon(shape, ctx) {
         });
 
         renderableObstacles.forEach(shape => {
-            ctx.fillStyle = terrainColors[shape.terrainType] || '#CCCCCC';
+            ctx.fillStyle = terrainPatterns[shape.terrainType] || terrainColors[shape.terrainType] || '#CCCCCC';
             if (shape.type === 'rect') drawRect(shape, ctx);
             else if (shape.type === 'circle') drawCircle(shape, ctx);
             else if (shape.type === 'oval') drawOval(shape, ctx);
@@ -489,6 +515,7 @@ function drawPolygon(shape, ctx) {
 
     async function initializeGame() {
         await loadAllCourses();
+        await loadTextures();
         showLevelSelection();
         gameLoop();
     }
