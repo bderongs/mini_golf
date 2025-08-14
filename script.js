@@ -43,9 +43,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let allPhysicsShapes = [];
 
     // --- Game Constants ---
-    const NORMAL_FRICTION = 0.985;
-    const SAND_FRICTION = 0.88;
-    const ROUGH_FRICTION = 0.95;
+    const NORMAL_FRICTION = 0.98;
+    const SAND_FRICTION = 0.80;
+    const ROUGH_FRICTION = 0.92;
+    const GREEN_FRICTION = 0.985;
     const MIN_VELOCITY = 0.08;
     const MAX_POWER = 18;
     const POWER_SENSITIVITY = 12;
@@ -239,6 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let currentFriction = NORMAL_FRICTION;
             if (terrain === 'sand') currentFriction = SAND_FRICTION;
             else if (terrain === 'rough') currentFriction = ROUGH_FRICTION;
+            else if (terrain === 'green') currentFriction = GREEN_FRICTION;
             ballVel.x *= currentFriction;
             ballVel.y *= currentFriction;
         }
@@ -337,7 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const terrains = getTerrainAtPoint(currentBallPos);
         if (terrains.includes('sand')) return 'sand';
         if (terrains.includes('water')) return 'rough';
-        if (terrains.includes('green')) return 'fairway';
+        if (terrains.includes('green')) return 'green';
         if (terrains.includes('fairway')) return 'fairway';
         return 'rough';
     }
