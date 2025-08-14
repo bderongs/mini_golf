@@ -37,7 +37,8 @@ h1 {
     height: 57.85vw; /* Maintain 700/450 aspect ratio */
     max-width: 700px;
     max-height: 450px;
-    background-color: #556B2F; /* Dark Olive Green */
+    background-image: url('rough_texture.svg');
+    background-color: #2a8a2a; /* Fallback color */
     position: relative;
     overflow: hidden;
     cursor: crosshair;
@@ -156,13 +157,6 @@ h1 {
 .obstacle-sand {
     background: url('sand_texture.svg');
     background-size: cover;
-}
-
-/* Style Putting Green */
-.obstacle-green {
-    background-color: #90EE90; /* LightGreen */
-    border-radius: 50%;
-    z-index: 4; /* Above fairway, below other obstacles */
 }
 
 /* Style Obstacle Circulaire (si ajouté plus tard) */

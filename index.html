@@ -31,37 +31,15 @@
         </div>
 
         <div id="game-container">
-            <div id="course">
-                <div id="ball-shadow"></div>
-                <div id="ball"></div>
-                <div id="hole">
-                    <div class="flag"></div>
-                </div>
-                <svg id="course-svg" width="100%" height="100%" style="position: absolute; top: 0; left: 0; z-index: 1;">
-                    <defs>
-                        <!-- The grass texture will be referenced as a pattern -->
-                        <pattern id="grass-pattern" patternUnits="userSpaceOnUse" width="50" height="50">
-                            <image href="grass_texture.svg" x="0" y="0" width="50" height="50" />
-                        </pattern>
-                    </defs>
-                    <!-- Group for all fairway paths -->
-                    <g id="fairway-group"></g>
-                    <!-- The new aim line -->
-                    <line id="aim-line" x1="0" y1="0" x2="0" y2="0" stroke="rgba(255, 255, 255, 0.8)" stroke-width="2"
-                        stroke-dasharray="5,5" style="visibility: hidden;" />
-                </svg>
-            </div>
+            <canvas id="course-canvas" width="800" height="600"></canvas>
         </div>
 
-        <div id="message-area">Bienvenue ! Cliquez et tirez la balle pour jouer.</div>
+        <div id="message-area">Welcome! Click and drag the ball to play.</div>
     </div>
 
-
-    <div id="debug-info" style="margin-top: 15px; font-size: 0.8em; color: #888;">
+    <div id="debug-info">
         <div id="version-display"></div>
-        <div id="hole-coords-display"></div>
-        <div id="mouse-coords-display"></div>
-        <div id="live-hole-coords-display"></div>
+        <div id="terrain-debug-display">Mouse over terrain: _</div>
     </div>
 
     <script src="script.js"></script>

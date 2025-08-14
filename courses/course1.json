@@ -1,0 +1,12 @@
+{
+    "name": "Test Course 1",
+    "par": 3,
+    "start": { "x": 10, "y": 50 },
+    "hole": { "x": 90, "y": 50 },
+    "obstacles": [
+        {
+            "type": "fairway",
+            "shape": { "type": "oval", "cx": 50, "cy": 50, "rx": 45, "ry": 25 }
+        }
+    ]
+}
