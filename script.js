@@ -65,6 +65,13 @@ document.addEventListener('DOMContentLoaded', () => {
         green: '#90EE90'
     };
 
+    const terrainPriority = {
+        'sand': 1,
+        'water': 2,
+        'green': 3,
+        'fairway': 4,
+    };
+
     // --- Screen Management ---
     function showLevelSelection() {
         levelSelectionScreen.style.display = 'block';
@@ -362,6 +369,12 @@ function drawPolygon(shape, ctx) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = terrainColors.rough;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        renderableObstacles.sort((a, b) => {
+            const priorityA = terrainPriority[a.terrainType] || 99;
+            const priorityB = terrainPriority[b.terrainType] || 99;
+            return priorityB - priorityA;
+        });
 
         renderableObstacles.forEach(shape => {
             ctx.fillStyle = terrainColors[shape.terrainType] || '#CCCCCC';
