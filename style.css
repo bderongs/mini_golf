@@ -37,11 +37,22 @@ h1 {
     height: 57.85vw; /* Maintain 700/450 aspect ratio */
     max-width: 700px;
     max-height: 450px;
-    background-color: #000; /* Black for rough */
+    background-color: #556B2F; /* Dark Olive Green */
     position: relative;
     overflow: hidden;
     cursor: crosshair;
     border-radius: 3px;
+}
+
+#course-svg {
+    z-index: 2; /* Above the rough, below obstacles */
+    pointer-events: none; /* Allow clicks to pass through to the course */
+}
+
+.fairway-path {
+    fill: url(#grass-pattern);
+    stroke: #2e8b57; /* A slightly darker green for the edge */
+    stroke-width: 2;
 }
 
 #ball-shadow {
@@ -134,12 +145,6 @@ h1 {
     height: 30px; /* Example size, can be randomized */
 }
 
-/* Style Fairway */
-.obstacle-fairway {
-    background-color: #4caf50; /* A nice, lighter green for the fairway */
-    z-index: 1; /* Below other obstacles */
-}
-
 /* Style Eau */
 .obstacle-water {
     background: url('water_texture.svg');
@@ -151,6 +156,13 @@ h1 {
 .obstacle-sand {
     background: url('sand_texture.svg');
     background-size: cover;
+}
+
+/* Style Putting Green */
+.obstacle-green {
+    background-color: #90EE90; /* LightGreen */
+    border-radius: 50%;
+    z-index: 4; /* Above fairway, below other obstacles */
 }
 
 /* Style Obstacle Circulaire (si ajouté plus tard) */
