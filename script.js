@@ -60,7 +60,8 @@ document.addEventListener('DOMContentLoaded', () => {
         fairway: '#4caf50',
         sand: '#F4A460',
         water: '#1E90FF',
-        rough: '#000000'
+        rough: '#006400',
+        green: '#90EE90'
     };
 
     // --- Screen Management ---
@@ -331,6 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const terrains = getTerrainAtPoint(currentBallPos);
         if (terrains.includes('sand')) return 'sand';
         if (terrains.includes('water')) return 'rough';
+        if (terrains.includes('green')) return 'fairway';
         if (terrains.includes('fairway')) return 'fairway';
         return 'rough';
     }

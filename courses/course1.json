@@ -5,6 +5,10 @@
     "hole": { "x": 90, "y": 50 },
     "obstacles": [
         {
+            "type": "green",
+            "shape": { "type": "circle", "cx": 90, "cy": 50, "radius": 15 }
+        },
+        {
             "type": "fairway",
             "shape": [
                 { "type": "circle", "cx": 15, "cy": 50, "radius": 10 },
