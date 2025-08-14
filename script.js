@@ -159,6 +159,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     visualShape.cy = shape.cy / 100 * canvas.height;
                     visualShape.rx = shape.rx / 100 * canvas.width;
                     visualShape.ry = shape.ry / 100 * canvas.height;
+                } else if (visualShape.type === 'polygon') {
+                    visualShape.points = shape.points.map(p => ({
+                        x: p.x / 100 * canvas.width,
+                        y: p.y / 100 * canvas.height
+                    }));
                 }
                 renderableObstacles.push(visualShape);
             });
@@ -340,6 +345,16 @@ document.addEventListener('DOMContentLoaded', () => {
     function drawRect(shape, ctx) { ctx.fillRect(shape.x, shape.y, shape.width, shape.height); }
     function drawCircle(shape, ctx) { ctx.beginPath(); ctx.arc(shape.cx, shape.cy, shape.radius, 0, Math.PI * 2); ctx.fill(); }
     function drawOval(shape, ctx) { ctx.beginPath(); ctx.ellipse(shape.cx, shape.cy, shape.rx, shape.ry, 0, 0, Math.PI * 2); ctx.fill(); }
+function drawPolygon(shape, ctx) {
+    if (!shape.points || shape.points.length < 3) return;
+    ctx.beginPath();
+    ctx.moveTo(shape.points[0].x, shape.points[0].y);
+    for (let i = 1; i < shape.points.length; i++) {
+        ctx.lineTo(shape.points[i].x, shape.points[i].y);
+    }
+    ctx.closePath();
+    ctx.fill();
+}
 
     function render() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -351,6 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (shape.type === 'rect') drawRect(shape, ctx);
             else if (shape.type === 'circle') drawCircle(shape, ctx);
             else if (shape.type === 'oval') drawOval(shape, ctx);
+            else if (shape.type === 'polygon') drawPolygon(shape, ctx);
         });
 
         // Draw hole
