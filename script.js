@@ -43,12 +43,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let allPhysicsShapes = [];
 
     // --- Game Constants ---
-    const NORMAL_FRICTION = 0.98;
+    const NORMAL_FRICTION = 0.95;
     const SAND_FRICTION = 0.80;
-    const ROUGH_FRICTION = 0.92;
+    const ROUGH_FRICTION = 0.85;
     const GREEN_FRICTION = 0.985;
     const MIN_VELOCITY = 0.08;
-    const MAX_POWER = 9;
+    const WEDGE_MAX_POWER = 9;
+    const PUTTER_MAX_POWER = 4;
     const POWER_SENSITIVITY = 12;
     const WATER_PENALTY = 1;
     const OUT_OF_BOUNDS_PENALTY = 1;
@@ -503,7 +504,8 @@ function drawShape(shape, ctx) {
 
         const power = Math.hypot(dx, dy);
         const angle = Math.atan2(dy, dx);
-        const actualPower = Math.min(power / POWER_SENSITIVITY, MAX_POWER);
+        const maxPowerForClub = (selectedClub === 'putter') ? PUTTER_MAX_POWER : WEDGE_MAX_POWER;
+        const actualPower = Math.min(power / POWER_SENSITIVITY, maxPowerForClub);
 
         if (actualPower > 0.5) {
             ballVel.x = Math.cos(angle) * actualPower;
