@@ -48,13 +48,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const ROUGH_FRICTION = 0.92;
     const GREEN_FRICTION = 0.985;
     const MIN_VELOCITY = 0.08;
-    const MAX_POWER = 18;
+    const MAX_POWER = 9;
     const POWER_SENSITIVITY = 12;
     const WATER_PENALTY = 1;
     const OUT_OF_BOUNDS_PENALTY = 1;
     const GRAVITY = 0.2;
-    const HOLE_RADIUS = 16;
-    const BALL_RADIUS = 10;
+    const HOLE_RADIUS = 8;
+    const BALL_RADIUS = 5;
     const NUM_LEVELS = 1;
 
     const terrainColors = {
